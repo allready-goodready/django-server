@@ -14,17 +14,6 @@ body:
               3. 인수 조건은 구현 완료 판별 기준입니다.  
               4. 필요한 하위 이슈가 있다면 마지막 필드에 링크해 주세요.
 
-    - type: textarea
-      id: screen_elements
-      attributes:
-          label: "🖼️ 화면 요소 (Screen Elements)"
-          description: "구현할 화면 요소들을 한 줄씩 작성하세요. 여러 개를 추가할 수 있습니다."
-          placeholder: |
-              - planner/templates/planner/html/plan_start.html
-              - planner/templates/planner/js/plan_start.js
-      validations:
-          required: true
-
     - type: dropdown
       id: wbs_category
       attributes:
@@ -48,6 +37,17 @@ body:
               plan_start.html 작성:
               - 시작일·종료일·예산 입력 폼 배치
               - 날짜 선택 위젯 초기화
+      validations:
+          required: true
+
+    - type: textarea
+      id: screen_elements
+      attributes:
+          label: "🖼️ 화면 요소 (Screen Elements)"
+          description: "구현할 화면 요소들을 한 줄씩 작성하세요. 여러 개를 추가할 수 있습니다."
+          placeholder: |
+              - planner/templates/planner/html/plan_start.html
+              - planner/templates/planner/js/plan_start.js
       validations:
           required: true
 
