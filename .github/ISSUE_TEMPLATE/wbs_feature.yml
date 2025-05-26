@@ -1,5 +1,5 @@
 name: "WBS 기반 기능 이슈"
-about: "WBS 항목에 따라 백엔드/프론트엔드 기능 이슈를 생성합니다"
+description: "WBS 항목에 따라 백엔드/프론트엔드 기능 이슈를 생성합니다"
 title: "[{{component}}-{{feature_code}}] {{feature_name}}"
 labels: []
 assignees: []
@@ -13,6 +13,7 @@ body:
           options:
               - "백엔드"
               - "프론트엔드"
+      validations:
           required: true
 
     - type: dropdown
@@ -29,6 +30,7 @@ body:
               - "6. 교통 경로 탐색 및 최적화"
               - "7. 예산 계산 및 항목 조정"
               - "8. 마이페이지 여행 계획 조회"
+      validations:
           required: true
 
     - type: input
@@ -37,6 +39,7 @@ body:
           label: "🆔 기능 코드"
           description: "WBS에서 정의된 코드 입력 (예: PLAN_DURATION_BUDGET)"
           placeholder: "PLAN_DURATION_BUDGET"
+      validations:
           required: true
 
     - type: input
@@ -45,6 +48,7 @@ body:
           label: "📝 기능명"
           description: "간단한 기능명 입력"
           placeholder: "TravelPlan 모델 정의"
+      validations:
           required: true
 
     - type: textarea
@@ -56,6 +60,7 @@ body:
               TravelPlan 모델 정의:
               - start_date < end_date 유효성 검증
               - budget_limit MinValueValidator 적용
+      validations:
           required: true
 
     - type: textarea
@@ -66,6 +71,7 @@ body:
           placeholder: |
               - [ ] TravelPlan 모델에 validation 메소드 추가
               - [ ] admin.py에 list_display 설정 완료
+      validations:
           required: true
 
     - type: textarea
@@ -76,4 +82,4 @@ body:
           placeholder: |
               - [ ] #123 PlaceAutocompleteAPIView 작성
               - [ ] #124 PlaceDetailAPIView 작성
-          required: false
+      # sub_issues는 선택 필드이므로 validations 생략
