@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-issue-config.json": "file:///Users/sean/Desktop/PRIVATE/employment/llbootcamp/DjangoPRJ/allready/.github/ISSUE_TEMPLATE/config.yml"
+    }
+}
