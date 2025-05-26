@@ -8,9 +8,9 @@ body:
     - type: markdown
       attributes:
           value: |
-              **🦁이슈 작성 전 확인 사항🦁**
+              **🦁이슈 작성 전 확인 사항**
               1. WBS 분류와 기능 코드를 정확히 기입했는지 확인하세요.  
-              2. 구현할 화면 요소를 모두 기입해주세요. 
+              2. 구현할 화면 요소를 모두 기입해주세요.  
               3. 인수 조건은 구현 완료 판별 기준입니다.  
               4. 필요한 하위 이슈가 있다면 마지막 필드에 링크해 주세요.
 
@@ -49,7 +49,6 @@ body:
                   - "FD-08"
                   - "FD-09"
                   - "FD-10"
-
               "2. 여행지 정보 제공":
                   - "PLAN_ENV_SETUP"
                   - "PLAN_MODEL_EXTEND"
@@ -65,7 +64,6 @@ body:
                   - "PLAN_DOC_SWAGGER"
                   - "PLAN_WRITE_TESTS"
                   - "PLAN_DEPLOY_PREP"
-
               "3. 여행 계획":
                   - "PLAN_DURATION_BUDGET"
                   - "PLAN_DEST_SELECT"
@@ -94,7 +92,6 @@ body:
                   - "MYPLAN_ROUTE_DETAIL"
                   - "MYPLAN_ROUTE_MAP"
                   - "MYPLAN_BUDGET_DETAIL"
-
               "4. 여행자 온보딩":
                   - "ONBOARD01"
                   - "ONBOARD02"
@@ -106,7 +103,6 @@ body:
                   - "ONBOARD08"
                   - "ONBOARD09"
                   - "ONBOARD10"
-
               "5. 사용자 관리": []
 
     - type: textarea
@@ -155,3 +151,5 @@ body:
           placeholder: |
               - [ ] #125 plan_start.js 작성
               - [ ] #126 plan_start.css 작성
+      validations:
+          required: false

@@ -48,7 +48,6 @@ body:
                   - "FD-08"
                   - "FD-09"
                   - "FD-10"
-
               "2. 여행지 정보 제공":
                   - "PLAN_ENV_SETUP"
                   - "PLAN_MODEL_EXTEND"
@@ -64,7 +63,6 @@ body:
                   - "PLAN_DOC_SWAGGER"
                   - "PLAN_WRITE_TESTS"
                   - "PLAN_DEPLOY_PREP"
-
               "3. 여행 계획":
                   - "PLAN_DURATION_BUDGET"
                   - "PLAN_DEST_SELECT"
@@ -93,7 +91,6 @@ body:
                   - "MYPLAN_ROUTE_DETAIL"
                   - "MYPLAN_ROUTE_MAP"
                   - "MYPLAN_BUDGET_DETAIL"
-
               "4. 여행자 온보딩":
                   - "ONBOARD01"
                   - "ONBOARD02"
@@ -105,17 +102,7 @@ body:
                   - "ONBOARD08"
                   - "ONBOARD09"
                   - "ONBOARD10"
-
               "5. 사용자 관리": []
-
-    - type: input
-      id: feature_name
-      attributes:
-          label: "📝 기능명"
-          description: "간단한 기능명 입력"
-          placeholder: "TravelPlan 모델 정의"
-      validations:
-          required: true
 
     - type: textarea
       id: description
@@ -143,7 +130,7 @@ body:
           required: true
 
     - type: textarea
-      id: screen_elements
+      id: sub_issues
       attributes:
           label: "🔗 서브 이슈 (Sub-issues)"
           description: |
@@ -152,3 +139,5 @@ body:
           placeholder: |
               - [ ] #123 모델 정의
               - [ ] #124 serializer 작성
+      validations:
+          required: false
