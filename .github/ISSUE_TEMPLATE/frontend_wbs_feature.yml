@@ -1,6 +1,7 @@
 name: "🌐 WBS 프론트엔드 기능 이슈"
 description: "WBS 항목에 따라 프론트엔드 기능 이슈를 생성합니다"
 title: "FE-feature_code-feature_name"
+labels: []
 
 body:
   - type: markdown
