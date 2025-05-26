@@ -1,9 +1,18 @@
-blank_issues_enabled: false # 빈 이슈 옵션 숨기기
+blank_issues_enabled: true
 
 issue_templates:
-    - name: "WBS 기반 기능 이슈"
-      about: "WBS 항목에 따라 백엔드/프론트엔드 기능 이슈를 생성합니다"
-      title: "[{{component}}-{{feature_code}}] {{feature_name}}"
-      labels: []
+    - name: "🔨 WBS 백엔드 기능 이슈"
+      about: "Allready 프로젝트 WBS의 백엔드 항목에 따라 기능 이슈를 생성합니다"
+      title: "[BE-{{feature_code}}] {{feature_name}}"
+      labels:
+          - feature
       assignees: []
-      template: "wbs_feature.yml"
+      template: "backend_wbs_feature.yml"
+
+    - name: "🌐 WBS 프론트엔드 기능 이슈"
+      about: "Allready 프로젝트 WBS의 프론트엔드 항목에 따라 기능 이슈를 생성합니다"
+      title: "[FE-{{feature_code}}] {{feature_name}}"
+      labels:
+          - feature
+      assignees: []
+      template: "frontend_wbs_feature.yml"
