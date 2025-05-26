@@ -1,137 +1,137 @@
 body:
-    - type: markdown
-      attributes:
-          value: |
-              **🦁 이슈 작성 전 확인 사항 (백엔드)**
-              1. WBS 분류와 기능 코드를 정확히 기입했는지 확인하세요.  
-              2. 인수 조건은 구현 완료 판별 기준입니다.  
-              3. 필요한 하위 이슈가 있다면 마지막 필드에 링크해 주세요.
+  - type: markdown
+    attributes:
+      value: |
+        **🦁 이슈 작성 전 확인 사항 (백엔드)**
+        1. WBS 분류와 기능 코드를 정확히 기입했는지 확인하세요.  
+        2. 인수 조건은 구현 완료 판별 기준입니다.  
+        3. 필요한 하위 이슈가 있다면 마지막 필드에 링크해 주세요.
 
-    - type: dropdown
-      id: wbs_category
-      attributes:
-          label: "📂 WBS 기반 작업 분류"
-          description: "관련된 WBS 분류를 선택하세요"
-          options:
-              - "1. 여행 피드"
-              - "2. 여행지 정보 제공"
-              - "3. 여행 계획"
-              - "4. 여행자 온보딩"
-              - "5. 사용자 관리"
-      validations:
-          required: true
+  - type: dropdown
+    id: wbs_category
+    attributes:
+      label: "📂 WBS 기반 작업 분류"
+      description: "관련된 WBS 분류를 선택하세요"
+      options:
+        - "1. 여행 피드"
+        - "2. 여행지 정보 제공"
+        - "3. 여행 계획"
+        - "4. 여행자 온보딩"
+        - "5. 사용자 관리"
+    validations:
+      required: true
 
-    - type: dropdown
-      id: wbs_code
-      attributes:
-          label: "🔢 WBS 상세 코드"
-          description: "선택한 WBS에 해당하는 상세 코드를 선택하세요"
-          options: [] # depends-on에 의해 자동 설정됨
-      validations:
-          required: true
-      depends-on:
-          wbs_category:
-              "1. 여행 피드":
-                  - "FD-01"
-                  - "FD-02"
-                  - "FD-03"
-                  - "FD-04"
-                  - "FD-05"
-                  - "FD-06"
-                  - "FD-07"
-                  - "FD-08"
-                  - "FD-09"
-                  - "FD-10"
-              "2. 여행지 정보 제공":
-                  - "PLAN_ENV_SETUP"
-                  - "PLAN_MODEL_EXTEND"
-                  - "PLAN_CMD_IMPLEMENT"
-                  - "PLAN_SCHEDULER_SETUP"
-                  - "PLAN_COUNTRY_API_SAVE"
-                  - "PLAN_SAFETY_API_SAVE"
-                  - "PLAN_PREP_API_SAVE"
-                  - "PLAN_GEOCODE_API_CACHE"
-                  - "PLAN_POI_API_SAVE"
-                  - "PLAN_AGGREGATE_VIEW"
-                  - "PLAN_TEMPLATE_JS"
-                  - "PLAN_DOC_SWAGGER"
-                  - "PLAN_WRITE_TESTS"
-                  - "PLAN_DEPLOY_PREP"
-              "3. 여행 계획":
-                  - "PLAN_DURATION_BUDGET"
-                  - "PLAN_DEST_SELECT"
-                  - "PLAN_ORIGIN_SELECT"
-                  - "AIRPORT_NEAR_ORIGIN"
-                  - "AIRPORT_NEAR_DEST"
-                  - "FLIGHT_SEARCH"
-                  - "FLIGHT_FILTER_TIME"
-                  - "FLIGHT_CANDIDATES"
-                  - "ACCOM_NEED_CHECK"
-                  - "ACCOM_SEARCH_OPTIONS"
-                  - "NO_ACCOM_ROUTE"
-                  - "ACCOM_MULTI_NIGHT"
-                  - "ACCOM_SINGLE_PRIOR"
-                  - "TRANSIT_ROUTE_FULL"
-                  - "TRANSIT_MODE_SELECT"
-                  - "TRANSIT_OPTIMIZE"
-                  - "ROUTE_VIEW_FORMAT"
-                  - "BUDGET_CALCULATION"
-                  - "BUDGET_EXCEED_CHECK"
-                  - "ITEM_REPLACE_OPTIONS"
-                  - "BUDGET_EXTRA_INPUT"
-                  - "BUDGET_FINALIZE"
-                  - "MYPLAN_OVERVIEW"
-                  - "MYPLAN_CARD_VIEW"
-                  - "MYPLAN_ROUTE_DETAIL"
-                  - "MYPLAN_ROUTE_MAP"
-                  - "MYPLAN_BUDGET_DETAIL"
-              "4. 여행자 온보딩":
-                  - "ONBOARD01"
-                  - "ONBOARD02"
-                  - "ONBOARD03"
-                  - "ONBOARD04"
-                  - "ONBOARD05"
-                  - "ONBOARD06"
-                  - "ONBOARD07"
-                  - "ONBOARD08"
-                  - "ONBOARD09"
-                  - "ONBOARD10"
-              "5. 사용자 관리": []
+  - type: dropdown
+    id: wbs_code
+    attributes:
+      label: "🔢 WBS 상세 코드"
+      description: "선택한 WBS에 해당하는 상세 코드를 선택하세요"
+      options: [] # depends-on에 의해 자동 설정됨
+    validations:
+      required: true
+    depends-on:
+      wbs_category:
+        "1. 여행 피드":
+          - "FD-01"
+          - "FD-02"
+          - "FD-03"
+          - "FD-04"
+          - "FD-05"
+          - "FD-06"
+          - "FD-07"
+          - "FD-08"
+          - "FD-09"
+          - "FD-10"
+        "2. 여행지 정보 제공":
+          - "PLAN_ENV_SETUP"
+          - "PLAN_MODEL_EXTEND"
+          - "PLAN_CMD_IMPLEMENT"
+          - "PLAN_SCHEDULER_SETUP"
+          - "PLAN_COUNTRY_API_SAVE"
+          - "PLAN_SAFETY_API_SAVE"
+          - "PLAN_PREP_API_SAVE"
+          - "PLAN_GEOCODE_API_CACHE"
+          - "PLAN_POI_API_SAVE"
+          - "PLAN_AGGREGATE_VIEW"
+          - "PLAN_TEMPLATE_JS"
+          - "PLAN_DOC_SWAGGER"
+          - "PLAN_WRITE_TESTS"
+          - "PLAN_DEPLOY_PREP"
+        "3. 여행 계획":
+          - "PLAN_DURATION_BUDGET"
+          - "PLAN_DEST_SELECT"
+          - "PLAN_ORIGIN_SELECT"
+          - "AIRPORT_NEAR_ORIGIN"
+          - "AIRPORT_NEAR_DEST"
+          - "FLIGHT_SEARCH"
+          - "FLIGHT_FILTER_TIME"
+          - "FLIGHT_CANDIDATES"
+          - "ACCOM_NEED_CHECK"
+          - "ACCOM_SEARCH_OPTIONS"
+          - "NO_ACCOM_ROUTE"
+          - "ACCOM_MULTI_NIGHT"
+          - "ACCOM_SINGLE_PRIOR"
+          - "TRANSIT_ROUTE_FULL"
+          - "TRANSIT_MODE_SELECT"
+          - "TRANSIT_OPTIMIZE"
+          - "ROUTE_VIEW_FORMAT"
+          - "BUDGET_CALCULATION"
+          - "BUDGET_EXCEED_CHECK"
+          - "ITEM_REPLACE_OPTIONS"
+          - "BUDGET_EXTRA_INPUT"
+          - "BUDGET_FINALIZE"
+          - "MYPLAN_OVERVIEW"
+          - "MYPLAN_CARD_VIEW"
+          - "MYPLAN_ROUTE_DETAIL"
+          - "MYPLAN_ROUTE_MAP"
+          - "MYPLAN_BUDGET_DETAIL"
+        "4. 여행자 온보딩":
+          - "ONBOARD01"
+          - "ONBOARD02"
+          - "ONBOARD03"
+          - "ONBOARD04"
+          - "ONBOARD05"
+          - "ONBOARD06"
+          - "ONBOARD07"
+          - "ONBOARD08"
+          - "ONBOARD09"
+          - "ONBOARD10"
+        "5. 사용자 관리": []
 
-    - type: textarea
-      id: description
-      attributes:
-          label: "💡 작업 내용 상세"
-          description: "WBS 항목에 맞춰 작업할 백엔드 내용을 상세히 작성하세요"
-          placeholder: |
-              TravelPlan 모델 정의:
-              - start_date < end_date 유효성 검증
-              - budget_limit MinValueValidator 적용
-      validations:
-          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "💡 작업 내용 상세"
+      description: "WBS 항목에 맞춰 작업할 백엔드 내용을 상세히 작성하세요"
+      placeholder: |
+        TravelPlan 모델 정의:
+        - start_date < end_date 유효성 검증
+        - budget_limit MinValueValidator 적용
+    validations:
+      required: true
 
-    - type: textarea
-      id: acceptance_criteria
-      attributes:
-          label: "✅ 인수 조건 (Acceptance Criteria)"
-          description: |
-              - 기능 명세서 및 입력, 예외 처리 등을 참고하여 만족해야 할 조건을 작성하세요.  
-              - 완료 기준을 하나씩 체크박스로 작성하세요.
-          placeholder: |
-              - [ ] TravelPlan 모델에 validation 메소드 추가
-              - [ ] admin.py에 list_display 설정 완료
-      validations:
-          required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "✅ 인수 조건 (Acceptance Criteria)"
+      description: |
+        - 기능 명세서 및 입력, 예외 처리 등을 참고하여 만족해야 할 조건을 작성하세요.  
+        - 완료 기준을 하나씩 체크박스로 작성하세요.
+      placeholder: |
+        - [ ] TravelPlan 모델에 validation 메소드 추가
+        - [ ] admin.py에 list_display 설정 완료
+    validations:
+      required: true
 
-    - type: textarea
-      id: sub_issues
-      attributes:
-          label: "🔗 서브 이슈 (Sub-issues)"
-          description: |
-              - 하위 백엔드 작업 이슈를 체크리스트 형식으로 링크하세요.  
-              - WBS 항목별로 추가해주세요.
-          placeholder: |
-              - [ ] #123 모델 정의
-              - [ ] #124 serializer 작성
-      validations:
-          required: false
+  - type: textarea
+    id: sub_issues
+    attributes:
+      label: "🔗 서브 이슈 (Sub-issues)"
+      description: |
+        - 하위 백엔드 작업 이슈를 체크리스트 형식으로 링크하세요.  
+        - WBS 항목별로 추가해주세요.
+      placeholder: |
+        - [ ] #123 모델 정의
+        - [ ] #124 serializer 작성
+    validations:
+      required: false
