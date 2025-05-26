@@ -1,6 +1,6 @@
 blank_issues_enabled: true
 
-issue_templates:
+contact_links:
   - name: "🔨 WBS 백엔드 기능 이슈"
     about: "Allready 프로젝트 WBS의 백엔드 항목에 따라 기능 이슈를 생성합니다"
     title: "BE-${{ inputs.wbs_code }}-${{ inputs.feature_name }}"
