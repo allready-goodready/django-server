@@ -1,0 +1,76 @@
+name: "🌐 WBS 프론트엔드 기능 이슈"
+description: "WBS 항목에 따라 프론트엔드 기능 이슈를 생성합니다"
+title: "FE-feature_code-feature_name"
+labels: []
+assignees: []
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              **🦁이슈 작성 전 확인 사항🦁**
+              1. WBS 분류와 기능 코드를 정확히 기입했는지 확인하세요.  
+              2. 구현할 화면 요소를 모두 기입해주세요. 
+              3. 인수 조건은 구현 완료 판별 기준입니다.  
+              4. 필요한 하위 이슈가 있다면 마지막 필드에 링크해 주세요.
+
+    - type: textarea
+      id: screen_elements
+      attributes:
+          label: "🖼️ 화면 요소 (Screen Elements)"
+          description: "구현할 화면 요소들을 한 줄씩 작성하세요. 여러 개를 추가할 수 있습니다."
+          placeholder: |
+              - planner/templates/planner/html/plan_start.html
+              - planner/templates/planner/js/plan_start.js
+      validations:
+          required: true
+
+    - type: dropdown
+      id: wbs_category
+      attributes:
+          label: "📂 WBS 기반 작업 분류"
+          description: "관련된 WBS 분류를 선택하세요"
+          options:
+              - "1. 여행 피드"
+              - "2. 여행지 정보 제공"
+              - "3. 여행 계획"
+              - "4. 여행자 온보딩"
+              - "5. 사용자 관리"
+      validations:
+          required: true
+
+    - type: textarea
+      id: description
+      attributes:
+          label: "💡 작업 내용 상세"
+          description: "WBS 항목에 맞춰 작업할 프론트엔드 내용을 상세히 작성하세요"
+          placeholder: |
+              plan_start.html 작성:
+              - 시작일·종료일·예산 입력 폼 배치
+              - 날짜 선택 위젯 초기화
+      validations:
+          required: true
+
+    - type: textarea
+      id: acceptance_criteria
+      attributes:
+          label: "✅ 인수 조건 (Acceptance Criteria)"
+          description: |
+              - 기능 명세서 및 화면 흐름을 참고하여 만족해야 할 조건을 작성하세요.  
+              - 완료 기준을 하나씩 체크박스로 작성하세요.
+          placeholder: |
+              - [ ] plan_start.html에 날짜 선택 기능 정상 동작
+              - [ ] budget 입력란이 숫자만 허용
+      validations:
+          required: true
+
+    - type: textarea
+      id: sub_issues
+      attributes:
+          label: "🔗 서브 이슈 (Sub-issues)"
+          description: |
+              - 하위 프론트엔드 작업 이슈를 체크리스트 형식으로 링크하세요.  
+              - WBS 항목별로 추가해주세요.
+          placeholder: |
+              - [ ] #125 plan_start.js 작성
+              - [ ] #126 plan_start.css 작성

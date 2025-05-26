@@ -1,0 +1,76 @@
+name: "🌐 WBS 백엔드 기능 이슈"
+description: "WBS 항목에 따라 백엔드 기능 이슈를 생성합니다"
+title: "BE-feature_code-feature_name"
+labels: []
+assignees: []
+
+body:
+    # ─────────────────────────────────────────────
+    - type: markdown
+        attributes:
+            value: |
+                **🦁이슈 작성 전 확인 사항🦁**
+                1. WBS 대분류와 기능 코드를 정확히 기입했는지 확인하세요.  
+                2. 인수 조건은 구현 완료 판별 기준이 됩니다.  
+                3. 필요한 하위 이슈가 있다면 마지막 필드에 링크해 주세요.
+    # ─────────────────────────────────────────────
+    - type: dropdown
+      id: component
+      attributes:
+      label: "💻 개발 파트"
+      description: "백엔드와 프론트엔드 중 하나를 선택하세요"
+      options:
+        - "백엔드(Django + MySQL)"
+        - "프론트엔드(Django template + Bootstrap)"
+      validations:
+        required: true
+
+    - type: dropdown
+      id: wbs_category
+      attributes:
+        label: "📂 WBS 기반 작업 분류"
+        description: "관련된 WBS 분류를 선택하세요"
+        options:
+            - "1. 여행 피드"
+            - "2. 여행지 정보 제공"
+            - "3. 여행 계획"
+            - "4. 여행자 온보딩"
+            - "5. 사용자 관리"
+        validations:
+            required: true
+
+    - type: textarea
+      id: description
+      attributes:
+            label: "💡 작업 내용 상세"
+            description: "WBS 항목에 맞춰 작업할 내용을 상세히 작성하세요"
+            placeholder: |
+                TravelPlan 모델 정의:
+                - start_date < end_date 유효성 검증
+                - budget_limit MinValueValidator 적용
+      validations:
+        required: true
+
+    - type: textarea
+      id: acceptance_criteria
+      attributes:
+            label: "✅ 인수 조건 (Acceptance Criteria)"
+            description: |
+                - 기능 명세서의 기능 설명 및 입력, 예외 처리 등을 참고하여 만족해야 할 조건을 작성하세요.
+                - 완료 기준을 하나씩 체크박스로 작성하세요
+            placeholder: |
+                - [ ] 사진의 용량에 10MB 제한이 있다(10MB 가 넘으면 사진을 입력할 수 없다).
+                - [ ] 사진의 크기에 160px-160px 제한이 있다(사진의 크기를 크롭하여 입력받는다).
+      validations:
+        required: true
+
+    - type: textarea
+      id: sub_issues
+      attributes:
+        label: "🔗 서브 이슈 (Sub-issues)"
+        description: |
+            - 하위 작업 이슈를 체크리스트 형식으로 링크하세요
+            - WBS 의 각 작업 분류를 참고하여 추가해주세요
+        placeholder: |
+            - [ ] #123 PlaceAutocompleteAPIView 작성
+            - [ ] #124 PlaceDetailAPIView 작성
