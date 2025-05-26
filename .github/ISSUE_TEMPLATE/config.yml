@@ -1,0 +1,9 @@
+blank_issues_enabled: false # 빈 이슈 옵션 숨기기
+
+issue_templates:
+    - name: "🔨 WBS 기반 기능 이슈"
+      about: "WBS 항목에 따라 백엔드/프론트엔드 기능 이슈를 생성합니다"
+      title: "[{{component}}-{{feature_code}}] {{feature_name}}"
+      labels: []
+      assignees: []
+      template: "wbs_feature.yml"

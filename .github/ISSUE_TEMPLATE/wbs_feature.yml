@@ -1,4 +1,4 @@
-name: "✨ WBS 기반 기능 이슈"
+name: "WBS 기반 기능 이슈"
 about: "WBS 항목에 따라 백엔드/프론트엔드 기능 이슈를 생성합니다"
 title: "[{{component}}-{{feature_code}}] {{feature_name}}"
 labels: []
