@@ -64,6 +64,18 @@
 
 ---
 
+## template 코드 위치
+
++ **전역템플릿 (BASE_DIR/templates/)**
+: base.html, 공통 include 파일(navbar, footer 등)을 두고, 모든 앱 템플릿에서 {% extends "base.html" %} 사용
+
+<br>
+
++ **앱별 템플릿 (앱이름/templates/앱이름/)**
+: APP_DIRS=True 일 때 render(request, "accounts/signup.html", {...}) 처럼 경로를 지정
+
+
+
 ## .env 예시:
 
 ```shell
