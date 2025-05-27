@@ -1,0 +1,91 @@
+# ── Python ─────────────────────────────────────────────────────────────────────
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ── Django ─────────────────────────────────────────────────────────────────────
+# Local settings and database
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Logs
+*.log
+
+# Media and static (if you collect or store locally)
+media/
+staticfiles/
+
+# ── Environment ────────────────────────────────────────────────────────────────
+# dotenv
+.env
+.env.*.local
+
+# Virtualenvs
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# pyenv
+.python-version
+
+# ── IDE / Editor ───────────────────────────────────────────────────────────────
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Emacs
+*~
+
+# Vim
+.*.swp
+*.swo
+
+# ── macOS / Linux / Windows ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# if you use Docker configs or layered builds
+docker-compose.override.yml
+
+# ── Optional ───────────────────────────────────────────────────────────────────
+# celery
+celerybeat-schedule
