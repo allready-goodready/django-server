@@ -37,13 +37,13 @@
 
 1. **개발 시작**
 
-   - 모든 기능 개발은 `develop` 브랜치에서 분기
-   - 예: `git checkout develop && git checkout -b feat-FD-01`
+   - 모든 기능 개발은 `feat` 브랜치에서 분기
+   - 예: `git checkout -b feat-FD-01`
 
 2. **기능 완료 후 PR**
 
-   - `feat-*`, `bugfix-*` 브랜치는 PR(PR 대상: `develop`)
-   - 코드 리뷰 → `develop` 병합
+   - `feat-*`, `bugfix-*` 브랜치는 PR(PR 대상: `feat`)
+   - 코드 리뷰 → `feat` 병합
 
 
 ---
