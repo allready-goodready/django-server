@@ -4,6 +4,7 @@ from .models import TravelPlan
 
 User = get_user_model()
 
+
 class TravelPlanSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -29,12 +30,14 @@ class TravelPlanSerializer(serializers.ModelSerializer):
         budget_limit은 음수일 수 없습니다.
         """
         start = attrs.get("start_date") or getattr(self.instance, "start_date", None)
-        end = attrs.get("end_date")   or getattr(self.instance, "end_date", None)
+        end = attrs.get("end_date") or getattr(self.instance, "end_date", None)
         if start and end and start > end:
-            raise serializers.ValidationError("여행 시작일은 종료일 이전이거나 같아야 합니다.")
-        
+            raise serializers.ValidationError(
+                "여행 시작일은 종료일 이전이거나 같아야 합니다."
+            )
+
         budget = attrs.get("budget_limit")
         if budget is not None and budget < 0:
             raise serializers.ValidationError("예산은 0원 이상 이어야 합니다.")
-        
+
         return attrs
