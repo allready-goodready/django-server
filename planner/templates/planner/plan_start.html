@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block css %}
+<style>
+  .plan-container {
+    width: 1000px;
+    max-width: 1000px;
+    height: 60px;
+    margin: 0 auto;
+    background: white;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.25);
+    border-radius: 7px;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .budget-section {
+    width: 300px;
+    height: 60px;
+    padding: 17px 10px;
+    background: white;
+    overflow: hidden;
+    border-radius: 5px;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .date-section {
+    align-self: stretch;
+    position: relative;
+    border-radius: 5px;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+  }
+  .date-input {
+    width: 170px;
+    height: 60px;
+    font-family: "Noto Sans KR";
+    line-height: 1;
+  }
+  .divider {
+    height: 40px;
+    border-left: 1px solid #e5e5e5;
+  }
+  .guest-section {
+    width: 150px;
+    height: 60px;
+    display: inline-flex;
+    align-items: center;
+    background: white;
+    border-radius: 5px;
+    justify-content: flex-start;
+    gap: 5px;
+  }
+  .guest-group {
+    width: 150px;
+  }
+  .search-btn {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #fe8115 0%, #ef233c 100%);
+    border-radius: 5px;
+  }
+  .search-btn img {
+    display: block;
+    width: 16.8px;
+    height: 16.8px;
+  }
+  /* 공통 폰트/라인히트 */
+  .plan-container input,
+  .plan-container .input-group-text {
+    font-family: "Noto Sans KR";
+    line-height: 1;
+  }
+</style>
+{% endblock css %}
+
+{% block content %}
+<!-- 예산·일정·객수 컨테이너 -->
+<div class="plan-container px-2">
+  <!-- 1) 예산 입력 영역 -->
+  <div class="budget-section d-inline-flex">
+    <input
+      type="number"
+      name="budget_limit"
+      min="0"
+      step="1"
+      class="form-control border-0 fs-5 fw-light text-center"
+      placeholder="예산을 입력하세요"
+      aria-label="예산 입력"
+    />
+    <div class="d-flex align-items-center ms-2">
+      <img src="/static/images/won.svg" alt="₩" width="26" height="24" class="opacity-25" />
+      <i class="bi bi-chevron-down ms-2" style="font-size:1rem;"></i>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 2) 일정 선택 영역 -->
+  <div class="date-section">
+    <input
+      type="date"
+      name="start_date"
+      class="form-control border-0 text-center fw-light fs-5 date-input"
+      placeholder="시작일"
+      aria-label="여행 시작일"
+    />
+    <span class="text-muted fs-4">–</span>
+    <input
+      type="date"
+      name="end_date"
+      class="form-control border-0 text-center fw-light fs-5 date-input"
+      placeholder="종료일"
+      aria-label="여행 종료일"
+    />
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 3) 객수 입력 영역 -->
+  <div class="guest-section">
+    <div class="input-group guest-group">
+      <input
+        type="number"
+        name="guest_count"
+        min="1"
+        step="1"
+        placeholder="여행객"
+        aria-label="여행객 수"
+        class="form-control border-0 text-center fs-5 fw-light"
+      />
+      <span class="input-group-text bg-white border-0 fs-5 fw-light">
+        명
+      </span>
+    </div>
+  </div>
+
+  <!-- 여행 계획 생성 시작 버튼 -->
+  <button type="button" onclick="location.href='#'" class="search-btn d-inline-flex align-items-center justify-content-center p-0 border-0" aria-label="여행 계획 생성 시작">
+    <img src="/static/images/search.svg" alt="검색" />
+  </button>
+</div>
+{% endblock content %}
