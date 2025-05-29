@@ -1,3 +1,4 @@
+from django.utils.timezone import localdate
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import TravelPlan
@@ -30,8 +31,14 @@ class TravelPlanSerializer(serializers.ModelSerializer):
         budget_limit은 음수일 수 없습니다.
         """
         start = attrs.get("start_date") or getattr(self.instance, "start_date", None)
+
+        if start and start < localdate():
+            raise serializers.ValidationError(
+                "여행 시작일은 오늘 또는 이후의 날짜여야 합니다."
+            )
+
         end = attrs.get("end_date") or getattr(self.instance, "end_date", None)
-        if start and end and start > end:
+        if end and start > end:
             raise serializers.ValidationError(
                 "여행 시작일은 종료일 이전이거나 같아야 합니다."
             )
