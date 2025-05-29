@@ -6,16 +6,16 @@ from .views import TravelPlanViewSet
 app_name = "planner_api"
 
 router = DefaultRouter()
-router.register(r"travel-plans", TravelPlanViewSet, basename="travelplan")
+router.register("travelplan", TravelPlanViewSet, basename="travelplan")
 
 urlpatterns = [
     path(
-        "/start/",
+        "start/",
         TravelPlanViewSet.as_view({"get": "list", "post": "create"}),
         name="api_plan_start",
     ),
     path(
-        "/my-plans/",
+        "my-plans/",
         TravelPlanViewSet.as_view({"get": "my_plans"}),
         name="api_plan_my_plans",
     ),
