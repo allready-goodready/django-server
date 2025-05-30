@@ -80,7 +80,8 @@
 
 {% block content %}
 <!-- 예산·일정·객수 컨테이너 -->
-<div class="plan-container px-2">
+<form action="/api/plan/start/" method="post" class="plan-container px-2">
+  {% csrf_token %}
   <!-- 1) 예산 입력 영역 -->
   <div class="budget-section d-inline-flex">
     <input
@@ -143,5 +144,6 @@
   <button type="button" onclick="location.href='#'" class="search-btn d-inline-flex align-items-center justify-content-center p-0 border-0" aria-label="여행 계획 생성 시작">
     <img src="/static/images/search.svg" alt="검색" />
   </button>
-</div>
+
+</form>
 {% endblock content %}
