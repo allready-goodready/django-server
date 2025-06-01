@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "django_bootstrap5",
+    'feed',  # FD-01
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
