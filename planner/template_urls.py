@@ -1,11 +1,11 @@
 from django.urls import path
 from django.views.generic import TemplateView
 
-app_name = "planner_templates"
+app_name = "planner"
 
 urlpatterns = [
     path(
-        "plan/start/",
+        "start/",
         TemplateView.as_view(template_name="planner/plan_start.html"),
         name="plan_start",
     ),

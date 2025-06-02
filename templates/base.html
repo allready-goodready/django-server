@@ -4,8 +4,10 @@
 <html>
 <head>
     {% bootstrap_css %}
+    {% block css %}{% endblock css %}
 </head>
 <body>
     {% bootstrap_javascript %}
     {% include 'common/navbar.html' %}
+    {% block content %}{% endblock content %}
 </body>
