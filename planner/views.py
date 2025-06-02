@@ -1,7 +1,9 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+
+from config.permissions import IsOwnerOrReadOnly
+from config.paginations import DefaultPagination
 
 from .models import TravelPlan
 from .serializers import (
@@ -23,12 +25,12 @@ class TravelPlanViewSet(viewsets.ModelViewSet):
     - confirm (커스텀 액션) → TravelPlanConfirmSerializer 사용, services.confirm_travelplan 호출
     """
 
-    permission_classes = [IsAuthenticated]
     queryset = TravelPlan.objects.all()
-
-    def get_queryset(self):
-        # 본인(user=request.user)의 여행 계획만 조회/수정/삭제하도록 제한
-        return TravelPlan.objects.filter(user=self.request.user)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    pagination_class = DefaultPagination
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ["created_at", "start_date", "end_date", "title"]
+    ordering = ["created_at"]
 
     def get_serializer_class(self):
         # action에 따라 사용하는 Serializer를 분기
