@@ -17,7 +17,7 @@ class TravelPlan(models.Model):
     title = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
-    budget_limit = models.IntegerField()
+    budget_limit = models.IntegerField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")
 
     # created_at은 생성 시 자동 기록, updated_at은 수정 시만 갱신.
