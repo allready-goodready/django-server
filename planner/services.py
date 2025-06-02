@@ -2,6 +2,7 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from .models import TravelPlan
 
+
 def confirm_travelplan(plan_id):
     """
     1) plan = TravelPlan(id=plan_id, status='draft') 조회
