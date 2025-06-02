@@ -75,12 +75,19 @@
     font-family: "Noto Sans KR";
     line-height: 1;
   }
+
+  .error-text {
+    color: #FE8115;
+    font-size: 12px;
+    font-family: "Noto Sans KR";
+    font-weight: 300;
+  }
 </style>
 {% endblock css %}
 
 {% block content %}
 <!-- 예산·일정·객수 컨테이너 -->
-<form action="/api/plan/start/" method="post" class="plan-container px-2">
+<form id="plan-form" action="/api/plan/start/" method="post" class="plan-container px-2">
   {% csrf_token %}
   <!-- 1) 예산 입력 영역 -->
   <div class="budget-section d-inline-flex">
@@ -141,9 +148,44 @@
   </div>
 
   <!-- 여행 계획 생성 시작 버튼 -->
-  <button type="button" onclick="location.href='#'" class="search-btn d-inline-flex align-items-center justify-content-center p-0 border-0" aria-label="여행 계획 생성 시작">
+  <button type="submit" class="search-btn d-inline-flex align-items-center justify-content-center p-0 border-0" aria-label="여행 계획 생성 시작">
     <img src="/static/images/search.svg" alt="검색" />
   </button>
 
 </form>
+
+<!-- 에러 메시지 출력 영역 -->
+<div id="form-error" class="error-text mt-1"></div>
+
+<script>
+  const form = document.getElementById('plan-form');
+  const errorEl = document.getElementById('form-error');
+
+  form.addEventListener('submit', function(e) {
+    errorEl.textContent = '';
+
+    const startVal = this.start_date.value;
+    const endVal   = this.end_date.value;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (!startVal || !endVal) {
+      errorEl.textContent = '시작일과 종료일을 모두 입력해주세요.';
+      e.preventDefault();
+      return;
+    }
+
+    const start = new Date(startVal);
+    const end   = new Date(endVal);
+
+    if (start < today) {
+      errorEl.textContent = '여행 시작일은 오늘 또는 이후의 날짜여야 합니다.';
+      e.preventDefault();
+    } else if (start > end) {
+      errorEl.textContent = '여행 시작일은 종료일 이전이거나 같아야 합니다.';
+      e.preventDefault();
+    }
+  });
+</script>
 {% endblock content %}
