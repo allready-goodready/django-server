@@ -1,7 +1,9 @@
 from django.utils.timezone import localdate
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import TravelPlan
+
+from .models import Location, TravelPlan
+from .services import upsert_location
 
 User = get_user_model()
 
@@ -166,3 +168,110 @@ class TravelPlanConfirmSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         return attrs
+
+
+class LocationModelSerializer(serializers.ModelSerializer):
+    """
+    - plan: write_only, 뷰에서 save(plan=...) 형태로 주입
+    - type: 뷰에서 자동 주입하므로 required=False
+    - place_id, name, address, lat, lng: 클라이언트에서 전달
+    - create(): upsert_location 호출
+    - update(): type/plan 변경 금지, 나머지 필드만 덮어씀
+    """
+
+    plan = serializers.PrimaryKeyRelatedField(
+        queryset=TravelPlan.objects.all(), write_only=True, required=False
+    )
+    type = serializers.ChoiceField(
+        choices=Location.TYPE_CHOICES,
+        required=False,  # 뷰에서 자동 주입하므로 클라이언트 입력 없이도 무방
+    )
+
+    class Meta:
+        model = Location
+        fields = (
+            "id",
+            "plan",  # write_only
+            "type",  # 뷰에서 주입
+            "place_id",
+            "name",
+            "address",
+            "lat",
+            "lng",
+        )
+        read_only_fields = ("id",)
+
+    def validate(self, attrs):
+        """
+        - create 시: 뷰에서 'type'을 주입하므로 attrs.get("type")이 존재
+        - update 시: instance가 생성된 상태이므로 attrs.get("type")은 없어도 됨
+        - 위경도 범위(-90 ≤ lat ≤ 90, -180 ≤ lng ≤ 180) 체크
+        """
+        # 1) type 검증:
+        loc_type = attrs.get("type", None)
+        if not self.instance:
+            # create 시: 반드시 type이 있어야 함
+            if loc_type not in ["origin", "destination"]:
+                raise serializers.ValidationError(
+                    {"type": "type 필드는 'origin' 또는 'destination'이어야 합니다."}
+                )
+        else:
+            # update 시: attrs에 type이 있으면 기존 instance.type과 비교
+            if loc_type is not None and loc_type != self.instance.type:
+                raise serializers.ValidationError(
+                    {"type": "이미 저장된 Location의 type은 변경할 수 없습니다."}
+                )
+
+        # 2) 위도(lat) 필수 및 범위 검사
+        lat = attrs.get("lat", getattr(self.instance, "lat", None))
+        if lat is None:
+            raise serializers.ValidationError({"lat": "위도(lat) 값이 필요합니다."})
+        if not (-90.0 <= lat <= 90.0):
+            raise serializers.ValidationError(
+                {"lat": "위도(lat)는 -90.0 이상, 90.0 이하의 값이어야 합니다."}
+            )
+
+        # 3) 경도(lng) 필수 및 범위 검사
+        lng = attrs.get("lng", getattr(self.instance, "lng", None))
+        if lng is None:
+            raise serializers.ValidationError({"lng": "경도(lng) 값이 필요합니다."})
+        if not (-180.0 <= lng <= 180.0):
+            raise serializers.ValidationError(
+                {"lng": "경도(lng)는 -180.0 이상, 180.0 이하의 값이어야 합니다."}
+            )
+
+        # 4) place_id, name, address 검사:
+        #    create 시 반드시 있어야 함
+        if not self.instance:
+            required_fields = ["place_id", "name", "address"]
+            missing = [f for f in required_fields if attrs.get(f) is None]
+            if missing:
+                raise serializers.ValidationError(
+                    {field: "이 필드는 반드시 필요합니다." for field in missing}
+                )
+
+        return attrs
+
+    def create(self, validated_data):
+        """
+        - validated_data: {'plan': TravelPlan 인스턴스, 'type': str, 'place_id': str, 'name': str, 'address': str, 'lat': float, 'lng': float}
+        - upsert_location을 호출하여 존재하면 수정, 없으면 생성
+        """
+        plan = validated_data.pop("plan")
+        user = self.context["request"].user
+        location, created = upsert_location(
+            user=user, plan_id=plan.id, validated_data=validated_data
+        )
+        return location
+
+    def update(self, instance, validated_data):
+        """
+        - instance: 기존 Location 인스턴스
+        - validated_data에는 'type'이나 'plan'이 있으면 무시, 나머지 필드만 덮어쓰기
+        """
+        validated_data.pop("type", None)
+        validated_data.pop("plan", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
