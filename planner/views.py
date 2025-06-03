@@ -1,17 +1,20 @@
-from rest_framework import viewsets, status, permissions, filters
+from django.shortcuts import get_object_or_404
+
+from rest_framework import viewsets, status, mixins, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from config.permissions import IsOwnerOrReadOnly
 from config.paginations import DefaultPagination
 
-from .models import TravelPlan
+from .models import TravelPlan, Location
 from .serializers import (
     TravelPlanDraftSerializer,
     TravelPlanUpdateSerializer,
     TravelPlanConfirmSerializer,
+    LocationModelSerializer,
 )
-from .services import confirm_travelplan
+from .services import confirm_travelplan, upsert_location
 
 
 class TravelPlanViewSet(viewsets.ModelViewSet):
@@ -48,7 +51,7 @@ class TravelPlanViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def confirm(self, request, pk=None):
         """
-        POST /api/travel-plans/{pk}/confirm/
+        POST /api/plan/travelplans/{pk}/confirm/
         Draft 상태의 TravelPlan을 최종 확정(confirmed)으로 변경합니다.
 
         - TravelPlanConfirmSerializer로 간단히 통과시킨 뒤,
@@ -69,3 +72,73 @@ class TravelPlanViewSet(viewsets.ModelViewSet):
             confirmed_plan, context={"request": request}
         )
         return Response(read_serializer.data, status=status.HTTP_200_OK)
+
+
+class DestinationViewSet(
+    viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin
+):
+    """
+    - GET  /api/plan/destination/         → 현재 사용자 소유 TravelPlan에 연결된
+                                            type='destination'인 Location 목록 조회
+    - POST /api/plan/destination/         → Destination upsert
+       • 요청바디:
+         {
+             "plan": "<plan_uuid>",
+             "place_id": "...",
+             "name": "...",
+             "address": "...",
+             "lat": 12.34,
+             "lng": 56.78
+         }
+       • 내부에서 `type="destination"`을 자동 주입 → upsert_location 호출
+    """
+
+    serializer_class = LocationModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # 모든 Location 중 type='destination'인 데이터 반환
+        queryset = Location.objects.filter(type="destination")
+        # (선택) 쿼리 파라미터로 plan=<plan_uuid>를 받으면, 해당 Plan에만 한정
+        plan_id = self.request.query_params.get("plan")
+        if plan_id:
+            queryset = queryset.filter(plan__id=plan_id)
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        """
+        POST /api/plan/destination/
+        - body에 "plan": "<plan_uuid>" 필수
+        - type은 내부에서 "destination"으로 주입
+        """
+        user = request.user
+        data = request.data.copy()
+
+        # 1) plan 필수 체크
+        plan_id = data.get("plan")
+        if not plan_id:
+            return Response(
+                {"plan": "이 필드는 반드시 필요합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 2) TravelPlan 소유권 확인
+        travel_plan = get_object_or_404(TravelPlan, pk=plan_id, user=user)
+
+        # 3) 타입 강제 주입
+        data["type"] = "destination"
+
+        # 4) serializer 검사 (plan은 write_only, type도 write_only이므로 data에 담아줘야 통과)
+        serializer = self.get_serializer(data=data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+
+        # 5) upsert_location 호출
+        location, created = upsert_location(
+            user=user, plan_id=travel_plan.id, validated_data=serializer.validated_data
+        )
+
+        # 6) 응답
+        output = self.get_serializer(location).data
+        output.pop("plan", None)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(output, status=status_code)
