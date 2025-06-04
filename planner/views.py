@@ -142,3 +142,60 @@ class DestinationViewSet(
         output.pop("plan", None)
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(output, status=status_code)
+
+
+class OriginViewSet(
+    viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin
+):
+    """
+    - GET  /api/plan/origin/         → 현재 사용자 소유 TravelPlan에 연결된
+                                        type='origin'인 Location 목록 조회
+    - POST /api/plan/origin/         → Origin upsert
+       • 요청바디:
+         {
+             "plan": "<plan_uuid>",
+             "place_id": "...",
+             "name": "...",
+             "address": "...",
+             "lat": 12.34,
+             "lng": 56.78
+         }
+       • 내부에서 `type="origin"`을 자동 주입 → upsert_location 호출
+    """
+
+    serializer_class = LocationModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Location.objects.filter(type="origin")
+        plan_id = self.request.query_params.get("plan")
+        if plan_id:
+            queryset = queryset.filter(plan__id=plan_id)
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data.copy()
+
+        plan_id = data.get("plan")
+        if not plan_id:
+            return Response(
+                {"plan": "이 필드는 반드시 필요합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        travel_plan = get_object_or_404(TravelPlan, pk=plan_id, user=user)
+
+        data["type"] = "origin"
+
+        serializer = self.get_serializer(data=data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+
+        location, created = upsert_location(
+            user=user, plan_id=travel_plan.id, validated_data=serializer.validated_data
+        )
+
+        output = self.get_serializer(location).data
+        output.pop("plan", None)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(output, status=status_code)
