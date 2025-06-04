@@ -86,6 +86,8 @@
 {% endblock css %}
 
 {% block content %}
+  {% include 'planner/destination_select.html' %}
+
 <!-- 예산·일정·객수 컨테이너 -->
 <form id="plan-form" action="/api/plan/start/" method="post" class="plan-container px-2">
   {% csrf_token %}
