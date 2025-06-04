@@ -167,7 +167,7 @@ class OriginViewSet(
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Location.objects.filter(plan__user=self.request.user, type="origin")
+        queryset = Location.objects.filter(type="origin")
         plan_id = self.request.query_params.get("plan")
         if plan_id:
             queryset = queryset.filter(plan__id=plan_id)
