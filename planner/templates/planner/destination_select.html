@@ -100,95 +100,161 @@
 </div>
 {% block script %}
   <script>
-    // --- 전역 변수 정의 (initMap과 콜백에서 모두 접근 가능하도록) ---
-    let map;
-    let singleMarker = null;
-    let clickedPosition = null;
-    let geocoder;
-    let placesService;  // PlacesService를 전역 변수로 선언
+  // --- 추가: 선택된 장소 정보를 담을 객체 ---
+  let selectedPlaceData = {
+    name: null,
+    address: null,
+    placeId: null,
+    lat: null,
+    lng: null,
+    country: null,
+    region: null,
+  };
 
-    // DOM 요소도 전역 변수로 선언만 해둡니다.
-    let mapPickerArea;
-    let searchPickerArea;
-    let separator;
-    let mapSection;
-    let confirmButton;
-    let locationInfo;
-    let errorMessage;
+  // --- 추가: 현재 TravelPlan ID
+  const planId = window.planId;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // DOM 로딩 후에 전역 변수에 요소 할당
-      mapPickerArea = document.getElementById('map-picker-area');
-      searchPickerArea = document.getElementById('search-picker-area');
-      separator = document.getElementById('separator');
-      mapSection = document.getElementById('map-section');
-      confirmButton = document.getElementById('confirm-location-btn');
-      locationInfo = document.getElementById('location-info');
-      errorMessage = document.getElementById('error-message');
+  // --- 전역 변수 정의 (initMap과 콜백에서 모두 접근 가능하도록) ---
+  let map;
+  let singleMarker = null;
+  let clickedPosition = null;
+  let geocoder;
+  let placesService; // PlacesService를 전역 변수로 선언
 
-      // 1) 왼쪽 영역에 마우스 오버 시 확장
-      mapPickerArea.addEventListener('mouseenter', () => {
-        mapPickerArea.classList.add('expanded');
-        separator.classList.add('hidden-by-js');
-        searchPickerArea.classList.add('hidden-by-js');
-        mapPickerArea.style.justifyContent = 'center';
-      });
+  // DOM 요소도 전역 변수로 선언만 해둡니다.
+  let mapPickerArea;
+  let searchPickerArea;
+  let separator;
+  let mapSection;
+  let confirmButton;
+  let locationInfo;
+  let errorMessage;
 
-      // 2) 마우스가 영역을 벗어나면 원래 상태로 복원 (단, 지도가 열린 상태가 아니면)
-      mapPickerArea.addEventListener('mouseleave', () => {
-        if (!mapSection.classList.contains('d-block')) {
-          mapPickerArea.classList.remove('expanded');
-          separator.classList.remove('hidden-by-js');
-          searchPickerArea.classList.remove('hidden-by-js');
-          mapPickerArea.style.justifyContent = 'flex-end';
-        }
-      });
+  document.addEventListener("DOMContentLoaded", () => {
+    // DOM 로딩 후에 전역 변수에 요소 할당
+    mapPickerArea = document.getElementById("map-picker-area");
+    searchPickerArea = document.getElementById("search-picker-area");
+    separator = document.getElementById("separator");
+    mapSection = document.getElementById("map-section");
+    confirmButton = document.getElementById("confirm-location-btn");
+    locationInfo = document.getElementById("location-info");
+    errorMessage = document.getElementById("error-message");
 
-      // 3) 왼쪽 영역 클릭 시 map-section 표시 및 Google Maps 초기화
-      mapPickerArea.addEventListener('click', () => {
-        if (!mapSection.classList.contains('d-block')) {
-          mapSection.classList.remove('d-none');
-          mapSection.classList.add('d-block');
-          initMap();
-        }
-      });
-
-      // 4) 여행지 선택 버튼 클릭 시 최종 위치 확정 처리
-      confirmButton.addEventListener('click', () => {
-        if (clickedPosition) {
-          console.log('최종 선택 위치:', clickedPosition);
-          // 서버 전송 로직 또는 다음 단계 이동 코드를 여기에 추가
-        }
-      });
+    // 1) 왼쪽 영역에 마우스 오버 시 확장
+    mapPickerArea.addEventListener("mouseenter", () => {
+      mapPickerArea.classList.add("expanded");
+      separator.classList.add("hidden-by-js");
+      searchPickerArea.classList.add("hidden-by-js");
+      mapPickerArea.style.justifyContent = "center";
     });
 
-    // 6) Google Maps API 호출 후 실행될 콜백 함수
-    function initMap() {
-      const defaultCenter = { lat: 37.5665, lng: 126.9780 }; // 서울 중심 좌표 예시
-      geocoder = new google.maps.Geocoder();
+    // 2) 마우스가 영역을 벗어나면 원래 상태로 복원 (단, 지도가 열린 상태가 아니면)
+    mapPickerArea.addEventListener("mouseleave", () => {
+      if (!mapSection.classList.contains("d-block")) {
+        mapPickerArea.classList.remove("expanded");
+        separator.classList.remove("hidden-by-js");
+        searchPickerArea.classList.remove("hidden-by-js");
+        mapPickerArea.style.justifyContent = "flex-end";
+      }
+    });
 
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: defaultCenter,
-        zoom: 12
-      });
+    // 3) 왼쪽 영역 클릭 시 map-section 표시 및 Google Maps 초기화
+    mapPickerArea.addEventListener("click", () => {
+      if (!mapSection.classList.contains("d-block")) {
+        mapSection.classList.remove("d-none");
+        mapSection.classList.add("d-block");
+        initMap();
+      }
+    });
 
-      placesService = new google.maps.places.PlacesService(map);  // PlacesService 초기화
+    // 4) 여행지 선택 버튼 클릭 시 API 요청 보내기
+    confirmButton.addEventListener("click", () => {
+      if (selectedPlaceData.lat && window.planId) {
+        // CSRF 토큰 가져오기
+        function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(
+                  cookie.substring(name.length + 1)
+                );
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+        const csrftoken = getCookie("csrftoken");
 
-      // 클릭 리스너: 클릭한 지점이 대한민국인지 확인 후 마커 생성/이동 처리
-      map.addListener('click', (event) => {
-        if (event.placeId) {
-          event.stop();  // 기본 정보 창 표시 방지
-          placesService.getDetails({
+        // 요청 바디에 보낼 데이터
+        const bodyData = {
+          plan: window.planId,
+          name: selectedPlaceData.name,
+          type: "destination",
+          address: selectedPlaceData.address,
+          lat: selectedPlaceData.lat,
+          lng: selectedPlaceData.lng,
+          place_id: selectedPlaceData.placeId,
+        };
+
+        fetch("/api/plan/destination/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify(bodyData),
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Destination created:", data);
+            // 생성 후 필요한 후속 처리 (리다이렉트 등)
+          })
+          .catch((error) => {
+            console.error("Error creating destination:", error);
+          });
+      }
+    });
+  });
+
+  // 5) Google Maps API 호출 후 실행될 콜백 함수
+  function initMap() {
+    const defaultCenter = { lat: 37.5665, lng: 126.9780 }; // 서울 중심 좌표 예시
+    geocoder = new google.maps.Geocoder();
+
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: defaultCenter,
+      zoom: 12,
+    });
+
+    placesService = new google.maps.places.PlacesService(map); // PlacesService 초기화
+
+    // 클릭 리스너: 클릭한 지점이 대한민국인지 확인 후 마커 생성/이동 처리
+    map.addListener("click", (event) => {
+      if (event.placeId) {
+        event.stop(); // 기본 정보 창 표시 방지
+        placesService.getDetails(
+          {
             placeId: event.placeId,
-            fields: ['name', 'formatted_address', 'address_components']
-          }, (place, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+            fields: ["place_id", "name", "formatted_address", "address_components"],
+          },
+          (place, status) => {
+            if (
+              status === google.maps.places.PlacesServiceStatus.OK &&
+              place
+            ) {
               // ① 국가가 'KR'인지 확인
               let isSouthKorea = false;
               for (const comp of place.address_components) {
                 if (
-                  comp.types.includes('country') &&
-                  comp.short_name === 'KR'
+                  comp.types.includes("country") &&
+                  comp.short_name === "KR"
                 ) {
                   isSouthKorea = true;
                   break;
@@ -201,122 +267,146 @@
                   singleMarker = null;
                 }
                 clickedPosition = null;
-                errorMessage.classList.remove('d-none');
+                errorMessage.classList.remove("d-none");
                 return;
               }
 
               // ② 마커 생성/이동
               placeSingleMarker(event.latLng);
 
-              // ③ 장소명, 주소, 위경도 출력
-              const countryComp = place.address_components.find(c =>
-                c.types.includes('country')
+              // ③ 장소명, 주소, 지역, 국가, 위경도 정보 저장
+              const countryComp = place.address_components.find((c) =>
+                c.types.includes("country")
               );
-              const regionComp = place.address_components.find(c =>
-                c.types.includes('administrative_area_level_1') ||
-                c.types.includes('locality')
-              ) || {};
-              const country = countryComp ? countryComp.long_name : '';
-              const region = regionComp.long_name || '';
-              const placeName = place.name || '';
-              const formattedAddress = place.formatted_address || '';
+              const regionComp =
+                place.address_components.find(
+                  (c) =>
+                    c.types.includes("administrative_area_level_1") ||
+                    c.types.includes("locality")
+                ) || {};
+              selectedPlaceData = {
+                name: place.name || "",
+                address: place.formatted_address || "",
+                placeId: place.place_id || null,
+                lat: event.latLng.lat(),
+                lng: event.latLng.lng(),
+                country: countryComp ? countryComp.long_name : "",
+                region: regionComp.long_name || "",
+              };
 
-              locationInfo.textContent =
-                `${placeName} · ${formattedAddress} (${region}, ${country}) · 위도: ${event.latLng.lat().toFixed(6)}, 경도: ${event.latLng.lng().toFixed(6)}`;
+              locationInfo.textContent = `${selectedPlaceData.name} · ${selectedPlaceData.address} (${selectedPlaceData.region}, ${selectedPlaceData.country}) · 위도: ${selectedPlaceData.lat.toFixed(
+                6
+              )}, 경도: ${selectedPlaceData.lng.toFixed(6)}`;
               confirmButton.disabled = false;
             }
-          });
-          return;
-        }
-
-        // 먼저 에러 메시지와 이전 마커/선택을 초기화
-        errorMessage.classList.add('d-none');
-        document.getElementById('confirm-location-btn').disabled = true;
-        locationInfo.textContent = '';
-
-        // 지오코더를 통해 클릭 위치의 주소 정보 가져오기
-        geocoder.geocode({ location: event.latLng }, (results, status) => {
-          if (status === 'OK' && results) {
-            // 1) 대한민국인지 판별
-            let isSouthKorea = false;
-            for (const result of results) {
-              for (const comp of result.address_components) {
-                if (
-                  comp.types.includes('country') &&
-                  comp.short_name === 'KR'
-                ) {
-                  isSouthKorea = true;
-                  break;
-                }
-              }
-              if (isSouthKorea) break;
-            }
-
-            if (isSouthKorea) {
-              if (singleMarker) {
-                singleMarker.setMap(null);
-                singleMarker = null;
-              }
-              clickedPosition = null;
-              errorMessage.classList.remove('d-none');
-              return;
-            }
-
-            // 2) 대한민국이 아니라면, 가장 정확한 주소 결과(result[0])를 사용해 표시
-            const primaryResult = results[0];
-            const components = primaryResult.address_components;
-            let country = '';
-            let region = '';
-            for (const comp of components) {
-              if (comp.types.includes('country')) {
-                country = comp.long_name;
-              }
-              if (
-                comp.types.includes('administrative_area_level_1') ||
-                comp.types.includes('locality')
-              ) {
-                region = comp.long_name;
-              }
-            }
-            const formattedAddress = primaryResult.formatted_address;
-
-            // 3) 단일 마커 생성/이동
-            placeSingleMarker(event.latLng);
-
-            // 4) 위치 출력란에 주소, 지역, 국가, 위경도 함께 표시
-            locationInfo.textContent =
-              `${formattedAddress} (${region}, ${country}) · 위도: ${event.latLng.lat().toFixed(6)}, 경도: ${event.latLng.lng().toFixed(6)}`;
-            confirmButton.disabled = false;
-          } else {
-            // geocode 실패 시: 기본 위경도만 표시
-            placeSingleMarker(event.latLng);
-            locationInfo.textContent =
-              `위도: ${event.latLng.lat().toFixed(6)}, 경도: ${event.latLng.lng().toFixed(6)}`;
-            confirmButton.disabled = false;
           }
-        });
+        );
+        return;
+      }
+
+      // 먼저 에러 메시지와 이전 마커/선택을 초기화
+      errorMessage.classList.add("d-none");
+      confirmButton.disabled = true;
+      locationInfo.textContent = "";
+
+      // 지오코더를 통해 클릭 위치의 주소 정보 가져오기
+      geocoder.geocode({ location: event.latLng }, (results, status) => {
+        if (status === "OK" && results) {
+          // 1) 대한민국인지 판별
+          let isSouthKorea = false;
+          for (const result of results) {
+            for (const comp of result.address_components) {
+              if (
+                comp.types.includes("country") &&
+                comp.short_name === "KR"
+              ) {
+                isSouthKorea = true;
+                break;
+              }
+            }
+            if (isSouthKorea) break;
+          }
+
+          if (isSouthKorea) {
+            if (singleMarker) {
+              singleMarker.setMap(null);
+              singleMarker = null;
+            }
+            clickedPosition = null;
+            errorMessage.classList.remove("d-none");
+            return;
+          }
+
+          // 2) 대한민국이 아니라면, 가장 정확한 주소 결과(result[0])를 사용해 표시
+          const primaryResult = results[0];
+          const components = primaryResult.address_components;
+          let country = "";
+          let region = "";
+          for (const comp of components) {
+            if (comp.types.includes("country")) {
+              country = comp.long_name;
+            }
+            if (
+              comp.types.includes("administrative_area_level_1") ||
+              comp.types.includes("locality")
+            ) {
+              region = comp.long_name;
+            }
+          }
+          const formattedAddress = primaryResult.formatted_address;
+
+          // 3) 단일 마커 생성/이동
+          placeSingleMarker(event.latLng);
+
+          // 4) 위치 출력란에 주소, 지역, 국가, 위경도 함께 표시
+          selectedPlaceData = {
+            name: formattedAddress,
+            address: formattedAddress,
+            placeId: null,
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng(),
+            country: country,
+            region: region,
+          };
+          locationInfo.textContent = `${selectedPlaceData.address} (${selectedPlaceData.region}, ${selectedPlaceData.country}) · 위도: ${selectedPlaceData.lat.toFixed(
+            6
+          )}, 경도: ${selectedPlaceData.lng.toFixed(6)}`;
+          confirmButton.disabled = false;
+        } else {
+          // geocode 실패 시: 기본 위경도만 표시
+          placeSingleMarker(event.latLng);
+          selectedPlaceData = {
+            name: "",
+            address: "",
+            placeId: null,
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng(),
+            country: "",
+            region: "",
+          };
+          locationInfo.textContent = `위도: ${selectedPlaceData.lat.toFixed(
+            6
+          )}, 경도: ${selectedPlaceData.lng.toFixed(6)}`;
+          confirmButton.disabled = false;
+        }
+      });
+    });
+  }
+
+  // 마커 생성/이동 처리 함수
+  function placeSingleMarker(latLng) {
+    if (singleMarker) {
+      singleMarker.setPosition(latLng);
+    } else {
+      singleMarker = new google.maps.Marker({
+        position: latLng,
+        map: map,
       });
     }
-
-    // 마커 생성/이동 처리 함수
-    function placeSingleMarker(latLng) {
-      if (singleMarker) {
-        singleMarker.setPosition(latLng);
-      } else {
-        singleMarker = new google.maps.Marker({
-          position: latLng,
-          map: map
-        });
-      }
-      clickedPosition = latLng;
-      // 위치 정보 출력란에 좌표 표시
-      locationInfo.textContent =
-        `위도: ${latLng.lat().toFixed(6)}, 경도: ${latLng.lng().toFixed(6)}`;
-      // 확인 버튼 활성화
-      document.getElementById('confirm-location-btn').disabled = false;
-    }
+    clickedPosition = latLng;
+  }
   </script>
-  <!-- Google Maps JS API 로드 (settings에서 전달된 키 사용) -->
+  <!-- Google Maps JS API 로드 (libraries=places 추가) -->
   <script async
           src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&callback=initMap"></script>
 {% endblock %}
