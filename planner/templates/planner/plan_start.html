@@ -175,8 +175,8 @@
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      if (!budget || !startVal || !endVal || !guestCount) {
-        errorEl.textContent = "모든 필드를 빠짐없이 입력해주세요.";
+      if (!startVal || !endVal) {
+        errorEl.textContent = "시작일과 종료일을 입력해주세요.";
         return;
       }
 
@@ -196,10 +196,10 @@
 
       // 요청 바디 데이터 구성
       const bodyData = {
-        budget_limit: parseInt(budget),
+        budget_limit: budget ? parseInt(budget) : null,
         start_date: startVal,
         end_date: endVal,
-        guest_count: parseInt(guestCount),
+        guest_count: guestCount ? parseInt(guestCount) : 1,
       };
 
       // TravelPlan 생성 API 호출
