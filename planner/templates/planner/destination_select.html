@@ -92,11 +92,15 @@
   <!-- 실제 지도가 그려질 영역 -->
   <div id="map"></div>
 
+  <!-- 에러 메시지 출력용 (대한민국 클릭 시) -->
+  <div id="error-message" class="alert alert-danger mt-2 d-none">
+    대한민국은 여행지로 선택할 수 없습니다.
+  </div>
+
   <!-- 위치 출력란 및 확인 버튼 -->
   <div class="d-flex align-items-center justify-content-between mt-2">
     <!-- 위치 정보 출력란 -->
     <div id="location-info" class="me-2">
-      <!-- 클릭한 좌표 또는 주소가 여기에 표시됩니다 -->
       선택된 위치 정보가 여기에 표시됩니다.
     </div>
     <!-- 여행지 선택 버튼 -->
@@ -113,53 +117,54 @@
 
 {% block script %}
 <script>
-  // --- 전역 변수 정의 ---
+  // --- 전역 변수 정의 (initMap과 콜백에서 모두 접근 가능하도록) ---
   let map;
   let singleMarker = null;
   let clickedPosition = null;
+  let geocoder;
+
+  // DOM 요소도 전역 변수로 선언만 해둡니다.
+  let mapPickerArea;
+  let searchPickerArea;
+  let separator;
+  let mapSection;
+  let confirmButton;
+  let locationInfo;
+  let errorMessage;
 
   document.addEventListener('DOMContentLoaded', () => {
-    const mapPickerArea = document.getElementById('map-picker-area');
-    const searchPickerArea = document.getElementById('search-picker-area');
-    const separator = document.getElementById('separator');
-    const mapSection = document.getElementById('map-section');
-    const confirmButton = document.getElementById('confirm-location-btn');
-    const locationInfo = document.getElementById('location-info');
+    // DOM 로딩 후에 전역 변수에 요소 할당
+    mapPickerArea = document.getElementById('map-picker-area');
+    searchPickerArea = document.getElementById('search-picker-area');
+    separator = document.getElementById('separator');
+    mapSection = document.getElementById('map-section');
+    confirmButton = document.getElementById('confirm-location-btn');
+    locationInfo = document.getElementById('location-info');
+    errorMessage = document.getElementById('error-message');
 
     // 1) 왼쪽 영역에 마우스 오버 시 확장
     mapPickerArea.addEventListener('mouseenter', () => {
       mapPickerArea.classList.add('expanded');
-
-      // 구분선과 오른쪽 영역 숨기기
       separator.classList.add('hidden-by-js');
       searchPickerArea.classList.add('hidden-by-js');
-
-      // 텍스트를 가운데 정렬
       mapPickerArea.style.justifyContent = 'center';
     });
 
-    // 2) 마우스가 영역을 벗어나면 원래 상태로 복원
+    // 2) 마우스가 영역을 벗어나면 원래 상태로 복원 (단, 지도가 열린 상태가 아니면)
     mapPickerArea.addEventListener('mouseleave', () => {
       if (!mapSection.classList.contains('d-block')) {
-        // 확장 클래스 제거
         mapPickerArea.classList.remove('expanded');
-        // 숨겼던 요소들 다시 보이도록
         separator.classList.remove('hidden-by-js');
         searchPickerArea.classList.remove('hidden-by-js');
-        // 원래 정렬로 복원
         mapPickerArea.style.justifyContent = 'flex-end';
       }
     });
 
     // 3) 왼쪽 영역 클릭 시 map-section 표시 및 Google Maps 초기화
     mapPickerArea.addEventListener('click', () => {
-      // 이미 map-section이 보이는 상태라면 추가 초기화 불필요
       if (!mapSection.classList.contains('d-block')) {
-        // map-section 보이기
         mapSection.classList.remove('d-none');
         mapSection.classList.add('d-block');
-
-        // Google Maps 초기화
         initMap();
       }
     });
@@ -167,58 +172,85 @@
     // 4) 여행지 선택 버튼 클릭 시 최종 위치 확정 처리
     confirmButton.addEventListener('click', () => {
       if (clickedPosition) {
-        // 예: 서버로 위치 정보를 전송하거나, 다음 단계로 이동
-        // 여기서는 콘솔에 출력
         console.log('최종 선택 위치:', clickedPosition);
-
-        // 예시: hidden input에 값을 담아서 폼 제출하거나, location.href 변경 등
-        // const hiddenInput = document.createElement('input');
-        // hiddenInput.type = 'hidden';
-        // hiddenInput.name = 'selected_latlng';
-        // hiddenInput.value = clickedPosition.lat + ',' + clickedPosition.lng;
-        // document.forms[0].appendChild(hiddenInput);
-        // document.forms[0].submit();
+        // 서버 전송 로직 또는 다음 단계 이동 코드를 여기에 추가
       }
     });
-
-    // 5) map 영역에서 클릭 시 마커 생성/이동 처리
-    window.placeSingleMarker = (latLng) => {
-      if (singleMarker) {
-        singleMarker.setPosition(latLng);
-      } else {
-        singleMarker = new google.maps.Marker({
-          position: latLng,
-          map: map
-        });
-      }
-      clickedPosition = latLng;
-
-      // 위치 정보 출력란에 좌표 표시
-      locationInfo.textContent = `위도: ${latLng.lat().toFixed(6)}, 경도: ${latLng.lng().toFixed(6)}`;
-
-      // 확인 버튼 활성화
-      confirmButton.disabled = false;
-    };
   });
 
-  // 6) Google Maps API 호출 후 실행될 콜백 함수. 
-  //    YOUR_API_KEY 부분에 본인의 API 키를 넣어주세요.
+  // 6) Google Maps API 호출 후 실행될 콜백 함수
   function initMap() {
     const defaultCenter = { lat: 37.5665, lng: 126.9780 }; // 서울 중심 좌표 예시
+    geocoder = new google.maps.Geocoder();
 
     map = new google.maps.Map(document.getElementById('map'), {
       center: defaultCenter,
       zoom: 12
     });
 
-    // 클릭 리스너: 클릭한 지점에 단일 마커 표시
+    // 클릭 리스너: 클릭한 지점이 대한민국인지 확인 후 마커 생성/이동 처리
     map.addListener('click', (event) => {
-      placeSingleMarker(event.latLng);
+      // 먼저 에러 메시지와 이전 마커/선택을 초기화
+      errorMessage.classList.add('d-none');
+      document.getElementById('confirm-location-btn').disabled = true;
+      locationInfo.textContent = '';
+      // 지오코더를 통해 클릭 위치의 주소 정보 가져오기
+      geocoder.geocode({ location: event.latLng }, (results, status) => {
+        if (status === 'OK' && results) {
+          // 주소 컴포넌트 중 country를 찾아내기
+          let isSouthKorea = false;
+          if (results.length > 0) {
+            for (const result of results) {
+              for (const comp of result.address_components) {
+                if (comp.types.includes('country') && comp.short_name === 'KR') {
+                  isSouthKorea = true;
+                  break;
+                }
+              }
+              if (isSouthKorea) break;
+            }
+          }
+          // 만약 대한민국이라면 에러 출력
+          if (isSouthKorea) {
+            // 기존 마커 제거
+            if (singleMarker) {
+              singleMarker.setMap(null);
+              singleMarker = null;
+            }
+            clickedPosition = null;
+            errorMessage.classList.remove('d-none');
+            return;
+          }
+          // 대한민국이 아니라면 단일 마커 표시
+          placeSingleMarker(event.latLng);
+        } else {
+          console.error('Geocoder 실패:', status);
+          // geocode 실패 시에도 마커를 표시할 수 있지만, 보류하거나 안내 메시지 처리 가능
+          placeSingleMarker(event.latLng);
+        }
+      });
     });
+  }
+
+  // 마커 생성/이동 처리 함수
+  function placeSingleMarker(latLng) {
+    if (singleMarker) {
+      singleMarker.setPosition(latLng);
+    } else {
+      singleMarker = new google.maps.Marker({
+        position: latLng,
+        map: map
+      });
+    }
+    clickedPosition = latLng;
+    // 위치 정보 출력란에 좌표 표시
+    locationInfo.textContent = `위도: ${latLng.lat().toFixed(6)}, 경도: ${latLng.lng().toFixed(6)}`;
+    // 확인 버튼 활성화
+    document.getElementById('confirm-location-btn').disabled = false;
   }
 </script>
 
-<!-- Google Maps JS API 로드 (YOUR_API_KEY 를 실제 키로 교체) -->
+<!-- Google Maps JS API 로드 (settings에서 전달된 키 사용) -->
 <script async
   src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&callback=initMap">
 </script>
