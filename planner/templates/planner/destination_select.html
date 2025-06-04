@@ -195,24 +195,21 @@
       document.getElementById('confirm-location-btn').disabled = true;
       locationInfo.textContent = '';
       // 지오코더를 통해 클릭 위치의 주소 정보 가져오기
+      // 대한민국 체크 후, 주소 정보까지 함께 가져와서 표시
       geocoder.geocode({ location: event.latLng }, (results, status) => {
         if (status === 'OK' && results) {
-          // 주소 컴포넌트 중 country를 찾아내기
+          // 1) 대한민국인지 판별
           let isSouthKorea = false;
-          if (results.length > 0) {
-            for (const result of results) {
-              for (const comp of result.address_components) {
-                if (comp.types.includes('country') && comp.short_name === 'KR') {
-                  isSouthKorea = true;
-                  break;
-                }
+          for (const result of results) {
+            for (const comp of result.address_components) {
+              if (comp.types.includes('country') && comp.short_name === 'KR') {
+                isSouthKorea = true;
+                break;
               }
-              if (isSouthKorea) break;
             }
+            if (isSouthKorea) break;
           }
-          // 만약 대한민국이라면 에러 출력
           if (isSouthKorea) {
-            // 기존 마커 제거
             if (singleMarker) {
               singleMarker.setMap(null);
               singleMarker = null;
@@ -221,12 +218,35 @@
             errorMessage.classList.remove('d-none');
             return;
           }
-          // 대한민국이 아니라면 단일 마커 표시
+ 
+          // 2) 대한민국이 아니라면, 가장 정확한 주소 결과(result[0])를 사용해 표시
+          const primaryResult = results[0];
+          const components = primaryResult.address_components;
+          let country = '';
+          let region = '';
+          for (const comp of components) {
+            if (comp.types.includes('country')) {
+              country = comp.long_name;
+            }
+            if (comp.types.includes('administrative_area_level_1') || comp.types.includes('locality')) {
+              region = comp.long_name;
+            }
+          }
+          const formattedAddress = primaryResult.formatted_address;
+ 
+          // 3) 단일 마커 생성/이동
           placeSingleMarker(event.latLng);
+ 
+          // 4) 위치 출력란에 주소, 지역, 국가, 위경도 함께 표시
+          locationInfo.textContent = 
+            `${formattedAddress} (${region}, ${country}) · 위도: ${event.latLng.lat().toFixed(6)}, 경도: ${event.latLng.lng().toFixed(6)}`;
+          confirmButton.disabled = false;
         } else {
-          console.error('Geocoder 실패:', status);
-          // geocode 실패 시에도 마커를 표시할 수 있지만, 보류하거나 안내 메시지 처리 가능
+          // geocode 실패 시: 기본 위경도만 표시
           placeSingleMarker(event.latLng);
+          locationInfo.textContent = 
+            `위도: ${event.latLng.lat().toFixed(6)}, 경도: ${event.latLng.lng().toFixed(6)}`;
+          confirmButton.disabled = false;
         }
       });
     });
