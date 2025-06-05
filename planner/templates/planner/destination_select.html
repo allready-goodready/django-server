@@ -191,12 +191,23 @@
 
       // 3) 왼쪽 영역 클릭 시 map-section 표시 및 Google Maps 초기화
       mapPickerArea.addEventListener("click", () => {
+        // 자동완성 섹션 숨기기
         searchSection.classList.add("d-none");
         confirmSearchButton.disabled = true;
         searchError.classList.add("d-none");
-        if (!mapSection.classList.contains("d-block")) {
-          mapSection.classList.remove("d-none");
-          mapSection.classList.add("d-block");
+
+        // map-section을 항상 다시 보여주고, 필요하면 리사이즈/초기화
+        mapSection.classList.remove("d-none");
+        mapSection.classList.add("d-block");
+
+        // 이미 지도가 초기화되어 있다면 리사이즈 이벤트를 트리거하여 보이도록 강제
+        if (map) {
+          google.maps.event.trigger(map, "resize");
+          // 지도 중심이 깨질 수 있으므로 재설정
+          const center = map.getCenter();
+          map.setCenter(center);
+        } else {
+          // 최초 클릭인 경우 initMap() 호출
           initMap();
         }
         // 클릭 후 원래 상태로 복원
