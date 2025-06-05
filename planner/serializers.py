@@ -20,6 +20,7 @@ class TravelPlanDraftSerializer(serializers.ModelSerializer):
 
     id = serializers.UUIDField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    title = serializers.CharField(max_length=255, required=False, allow_blank=True)
     status = serializers.CharField(
         read_only=True
     )  # 항상 'draft'로 생성되므로 read_only
@@ -90,7 +91,7 @@ class TravelPlanDraftSerializer(serializers.ModelSerializer):
         # validated_data에는 title, start_date, end_date, budget_limit, user가 존재
         plan = TravelPlan.objects.create(
             user=validated_data["user"],
-            title=validated_data["title"],
+            title=validated_data.get("title", ""),
             start_date=validated_data["start_date"],
             end_date=validated_data["end_date"],
             budget_limit=validated_data["budget_limit"],
@@ -243,7 +244,7 @@ class LocationModelSerializer(serializers.ModelSerializer):
         # 4) place_id, name, address 검사:
         #    create 시 반드시 있어야 함
         if not self.instance:
-            required_fields = ["place_id", "name", "address"]
+            required_fields = ["name", "address"]
             missing = [f for f in required_fields if attrs.get(f) is None]
             if missing:
                 raise serializers.ValidationError(
