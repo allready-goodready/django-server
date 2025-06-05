@@ -150,12 +150,10 @@
 
     // 2) 마우스가 영역을 벗어나면 원래 상태로 복원 (단, 지도가 열린 상태가 아니면)
     mapPickerArea.addEventListener("mouseleave", () => {
-      if (!mapSection.classList.contains("d-block")) {
-        mapPickerArea.classList.remove("expanded");
-        separator.classList.remove("hidden-by-js");
-        searchPickerArea.classList.remove("hidden-by-js");
-        mapPickerArea.style.justifyContent = "flex-end";
-      }
+      mapPickerArea.classList.remove("expanded");
+      separator.classList.remove("hidden-by-js");
+      searchPickerArea.classList.remove("hidden-by-js");
+      mapPickerArea.style.justifyContent = "flex-end";
     });
 
     // 3) 왼쪽 영역 클릭 시 map-section 표시 및 Google Maps 초기화
@@ -165,6 +163,11 @@
         mapSection.classList.add("d-block");
         initMap();
       }
+      // 클릭 후 원래 상태로 복원
+      mapPickerArea.classList.remove("expanded");
+      separator.classList.remove("hidden-by-js");
+      searchPickerArea.classList.remove("hidden-by-js");
+      mapPickerArea.style.justifyContent = "flex-end";
     });
 
     // 4) 여행지 선택 버튼 클릭 시 API 요청 보내기
