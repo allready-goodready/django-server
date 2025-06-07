@@ -1,0 +1,27 @@
+<!-- templates/feed/feed_upload.html -->
+<!-- 사진 첨부용 첫번째 모달 --> 
+<div id="modal_upload_feed" class="modal modal_overlay">
+    <!-- 바깥 X 버튼 -->
+    <span class="modal_close_outer" id="close_upload_modal_x">×</span>
+    
+    <div class="upload_modal_window">
+        <input type="file" id="image_input" accept="image/*" multiple hidden>
+        <div class="feed_create_nav d-flex justify-content-between align-items-center px-3">
+            <div></div>
+            <div class="modal_title_text"style="position: absolute; left: 50%; transform: translateX(-50%);">새 게시물 만들기</div>
+            <a id="select_img" class="feed_create_next text-decoration-none" style="cursor: pointer; display: none;">다음</a>
+        </div>
+
+        <div class="modal_image_upload" id="image_upload_area">
+            <span id="upload_text"> 사진을 첨부하세요.</span>
+            <button id="next_feed_step" class="btn btn-primary mt-3">사진 선택</button>
+
+            <!-- 사진 미리보기 영역 (초기에 숨김) -->
+            <div id="preview_wrapper" class="d-none text-center">
+                <div id="image_slider" class="image-box">
+                    <img id="current_preview" src="" alt="미리보기" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
