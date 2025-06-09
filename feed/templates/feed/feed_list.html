@@ -1,11 +1,66 @@
 <!-- templates/feed/feed_list.html -->
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}피드 작성 테스트{% endblock %}
+{% block title %}피드 목록{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/feed_list.css' %}">
+{% endblock %}
+
 
 {% block content %}
-<div class="container mt-5">
-  <h2>피드 작성 기능 테스트</h2>
-  <p>위 네비게이션 바의 + 버튼을 눌러 피드 작성을 테스트해보세요!</p>
+<div class="container feed-container mt-5">
+  <div class="row row-cols-1 row-cols-md-3 g-1">
+    {% for i in "ABCDEFGHIJKL" %}
+      <div class="col">
+        <div class="feed-item position-relative">
+          <div class="image-box">
+            <a href="#">
+              <img src="{% static 'images/1.png' %}" class="feed-img" alt="피드 이미지">
+              <!-- 오버레이 -->
+              <div class="feed-overlay d-flex flex-column justify-content-between">
+                
+                <!-- 상단: 프로필 + 여행지 + 북마크 -->
+                <div class="overlay-top d-flex justify-content-between align-items-start">
+                  <div class="d-flex align-items-center">
+                    <img src="{% static 'images/user.jpg' %}" class="profile-img me-2" alt="프로필">
+                    <div class="username text-white fw-bold">likelion</div>
+                  </div>
+                  <img src="{% static 'images/bookmark.png' %}" class="bookmark-icon" alt="북마크">
+                </div>
+
+                <div class="location fw-semibold mt-1">
+                  # 미국/뉴욕/맨해튼/맨해튼 다리
+                </div>
+
+                <!-- 하단: 캡션 -->
+                <p class="caption text-white mt-auto">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis feugiat...
+                </p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <nav aria-label="피드 페이지네이션" class="mt-5">
+    <ul class="pagination justify-content-center">
+      <li class="page-item disabled">
+        <a class="page-link">Previous</a>
+      </li>
+      <li class="page-item active">
+        <a class="page-link" href="#">1</a>
+      </li>
+      <li class="page-item"><a class="page-link" href="#">2</a></li>
+      <li class="page-item"><a class="page-link" href="#">3</a></li>
+      <li class="page-item">
+        <a class="page-link" href="#">Next</a>
+      </li>
+    </ul>
+</nav>
+
 </div>
 {% endblock %}

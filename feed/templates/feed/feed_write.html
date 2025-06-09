@@ -1,6 +1,10 @@
 <!-- templates/feed/feed_write.html -->
 {% load static %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/feed_write.css' %}">
+{% endblock %}
+
 <!-- 업로드 / 크롭 / 작성 모달을 모두 포함 -->
 {% include "feed/feed_upload.html" %}
 {% include "feed/feed_crop.html" %}
