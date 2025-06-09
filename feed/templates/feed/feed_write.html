@@ -1,0 +1,14 @@
+<!-- templates/feed/feed_write.html -->
+{% load static %}
+
+<!-- 업로드 / 크롭 / 작성 모달을 모두 포함 -->
+{% include "feed/feed_upload.html" %}
+{% include "feed/feed_crop.html" %}
+{% include "feed/feed_create.html" %}
+
+<!-- 피드 작성 관련 JS -->
+<script src="{% static 'js/feed_upload.js' %}"></script>
+<script src="{% static 'js/feed_crop.js' %}"></script>
+<script src="{% static 'js/feed_create.js' %}"></script>
+<script src="{% static 'js/feed_search_modal.js' %}"></script>
+<script src="{% static 'js/feed_map_modal.js' %}"></script>

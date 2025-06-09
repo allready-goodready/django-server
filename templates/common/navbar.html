@@ -1,0 +1,40 @@
+<!-- templates/common/navbar.html -->
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid justify-content-center">
+    <!-- 최대 너비 1000px, 가운데 정렬, 내부 요소 space-between -->
+    <div class="d-flex w-100 justify-content-between align-items-center"
+         style="max-width: 1000px;">
+
+      <!-- Brand -->
+      <a class="navbar-brand" href="#">
+        <img src="{% static 'images/logo.svg' %}" height="40" alt="logo">
+      </a>
+
+      <!-- Search form -->
+      <form class="d-flex">
+        <input class="form-control me-2" type="search"
+               placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+
+      <div class="w-auto flex-grow-0 overflow-auto" id="navbarSupportedContent">
+        <ul class="navbar-nav flex-row flex-nowrap">
+          <li class="nav-item">
+            <a class="nav-link p-2" aria-current="page" href="/"><img src="{% static 'images/trip_point.svg' %}" height="24" alt="trip_point"></a>
+          </li>
+          <li class="nav-item">
+            <a id="open_feed_create_modal" class="nav-link p-2" aria-current="page" href="#" onclick="return false;"><img src="{% static 'images/new_feed.svg' %}" height="24" alt="new_feed"></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link p-2" aria-current="page" href="/"><img src="{% static 'images/liked.svg' %}" height="24" alt="liked"></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link p-2" aria-current="page" href="/"><img src="{% static 'images/profile.svg' %}" height="24" alt="mypage"></a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</nav>

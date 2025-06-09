@@ -5,5 +5,4 @@ from feed import views
 
 urlpatterns= [
     path("", views.feed_list, name = "feed-list"),
-    path("create/", views.feed_create, name = "feed-create"),
 ]

@@ -79,6 +79,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "feed.context_processors.global_variables", # 모달로 피드를 작성하기 때문에 api키나 유저 정보를 context processor로 공통 변수 처리
             ],
         },
     },

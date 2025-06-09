@@ -1,0 +1,40 @@
+<!-- templates/base.html -->
+{% load static %}
+{% load django_bootstrap5 %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}AllReady{% endblock %}</title>
+    {% bootstrap_css %}
+    {% block css %}{% endblock css %}
+
+
+    <!-- 구글 머티리얼 아이콘 -->
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Cropper.js CSS & JS -->
+    <link href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+    <!-- 구글 Maps + Places API 로딩 -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=places"></script>
+
+    <!-- 모달용 CSS -->
+    <link rel="stylesheet" href="{% static 'css/feed_write.css' %}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% bootstrap_javascript %}  
+  {% include "common/navbar.html" %}
+
+  {% block content %}{% endblock %}
+
+  {% include "feed/feed_write.html" %}
+</body>
+</html>
