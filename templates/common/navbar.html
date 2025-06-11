@@ -6,7 +6,7 @@
          style="max-width: 1000px;">
 
       <!-- Brand -->
-      <a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="{% url 'base' %}">
         <img src="{% static 'images/logo.svg' %}" height="40" alt="logo">
       </a>
 
@@ -29,11 +29,14 @@
             <a class="nav-link p-2" aria-current="page" href="/"><img src="{% static 'images/liked.svg' %}" height="24" alt="liked"></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link p-2" aria-current="page" href="/"><img src="{% static 'images/profile.svg' %}" height="24" alt="mypage"></a>
+            {% if user.is_authenticated %}
+              <a class="nav-link p-2" aria-current="page" href="{% url 'accounts:profile' %}"><img src="{% static 'images/profile.svg' %}" height="24" alt="mypage"></a>
+            {% else %}
+              <a class="nav-link p-2" aria-current="page" href="#" onclick="openLoginModal(); return false;"><img src="{% static 'images/profile.svg' %}" height="24" alt="mypage"></a>
+            {% endif %}
           </li>
         </ul>
       </div>
-
     </div>
   </div>
 </nav>
