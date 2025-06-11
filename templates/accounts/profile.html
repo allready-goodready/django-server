@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- 프로필 헤더 -->
+    <div class="profile-header">
+        <div class="profile-image">
+            {% if user.profile.profile_image %}
+                <img src="{{ user.profile.profile_image.url }}" alt="{{ user.profile.nickname }}의 프로필 이미지">
+            {% else %}
+                <img src="{% static 'images/default_profile.png' %}" alt="기본 프로필 이미지">
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h2>{{ user.profile.nickname }}</h2>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-count">{{ feed_count }}</span>
+                    <span class="stat-label">게시물</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-count">{{ bookmarked_count }}</span>
+                    <span class="stat-label">북마크</span>
+                </div>
+            </div>
+            {% if user.profile.bio %}
+                <p class="bio">{{ user.profile.bio }}</p>
+            {% endif %}
+            <div class="profile-actions">
+                <a href="{% url 'accounts:update_profile' %}" class="btn btn-secondary">프로필 수정</a>
+                <a href="{% url 'accounts:signout' %}" class="btn btn-danger">로그아웃</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 프로필 탭 메뉴 -->
+    <div class="profile-tabs">
+        <a href="{% url 'accounts:profile' %}?tab=feeds" class="tab-item {% if active_tab == 'feeds' %}active{% endif %}">
+            <i class="fas fa-th"></i>
+            <span>게시물</span>
+            {% if active_tab == 'feeds' %}
+                <div class="active-indicator"></div>
+            {% endif %}
+        </a>
+        <a href="{% url 'accounts:profile' %}?tab=bookmarks" class="tab-item {% if active_tab == 'bookmarks' %}active{% endif %}">
+            <i class="fas fa-bookmark"></i>
+            <span>북마크</span>
+            {% if active_tab == 'bookmarks' %}
+                <div class="active-indicator"></div>
+            {% endif %}
+        </a>
+    </div>
+
+    <!-- 피드 그리드 -->
+    <div class="feed-grid">
+        {% if user_feeds %}
+            {% for feed in user_feeds %}
+                <a href="{% url 'feeds:feed_detail' feed.id %}" class="feed-item">
+                    {% if feed.image %}
+                        <img src="{{ feed.image.url }}" alt="{{ feed.title }}">
+                    {% else %}
+                        <img src="{% static 'images/default_feed.png' %}" alt="기본 이미지">
+                    {% endif %}
+                    <div class="feed-info">
+                        <h3>{{ feed.title }}</h3>
+                        <p class="location">{{ feed.location }}</p>
+                        <p class="travel-date">{{ feed.travel_date|date:"Y년 m월 d일" }}</p>
+                        <div class="feed-footer">
+                            <span><i class="fas fa-heart"></i> {{ feed.likes.count }}</span>
+                            <span><i class="fas fa-bookmark"></i> {{ feed.bookmarks.count }}</span>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        {% else %}
+            <div class="no-feeds">
+                {% if active_tab == 'bookmarks' %}
+                    <p>북마크한 게시물이 없습니다.</p>
+                {% else %}
+                    <p>작성한 게시물이 없습니다.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
+{% endblock %}
