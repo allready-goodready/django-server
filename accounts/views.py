@@ -1,41 +1,48 @@
-from django.shortcuts import render, redirect, get_object_or_404
+# Django 기본
+from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
+
+# 앱 모델 및 폼
 from .models import Profile, EmailVerification
 from .forms import ProfileUpdateForm, SignUpForm
 from feeds.models import TravelFeed
+
+# 인증 백엔드
 from django.contrib.auth.backends import ModelBackend
-from django.contrib.sites.shortcuts import get_current_site
+
+# 소셜 로그인
 from allauth.socialaccount.providers.kakao.views import KakaoOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.views import OAuth2LoginView, OAuth2CallbackView
 from allauth.socialaccount.models import SocialAccount, SocialApp
-from django.conf import settings
-from django.views.generic import View
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.kakao.provider import KakaoProvider
+
+# 기타 Django
+from django.conf import settings
+from django.views.generic import View
 from django.contrib.sites.models import Site
-import requests
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 from django.views.decorators.http import require_http_methods
 from django.core.mail import send_mail
 
+import requests
+
 User = get_user_model()
 
 def base(request):
-    # 회원가입 완료 플래그 확인 및 제거
+    # 기본 페이지 뷰
     signup_completed = request.session.pop('signup_completed', False)
     return render(request, 'base.html', {'signup_completed': signup_completed})
 
-def base2(request):
-    return render(request, 'base2.html')
-
 @require_http_methods(['POST'])
 def send_verification_email(request):
+    # 이메일 인증 코드
     try:
         email = request.POST.get('email')
         if not email:
@@ -83,6 +90,7 @@ def send_verification_email(request):
 
 @require_http_methods(['POST'])
 def verify_email(request):
+    # 이메일 인증 코드 확인
     try:
         email = request.POST.get('email')
         code = request.POST.get('code')
@@ -117,6 +125,10 @@ def verify_email(request):
             'error': str(e)
         })
 
+def login_user(request, user):
+    # 사용자 로그인
+    return login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
 @require_http_methods(['GET', 'POST'])
 def signup_view(request):
     if request.method == 'POST':
@@ -146,7 +158,7 @@ def signup_view(request):
                 user = form.save()
                 
                 # 로그인
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                login_user(request, user)
                 
                 # 이메일 인증 정보 삭제
                 verification.delete()
@@ -179,6 +191,7 @@ def signup_view(request):
     return render(request, 'accounts/signup.html', {'form': form})
 
 def signin_view(request):
+    # 로그인 처리
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -240,8 +253,8 @@ def update_profile_view(request):
 @login_required
 def user_activities_view(request):
     user = request.user
-    # 여기에 사용자의 활동 내역을 가져오는 로직을 추가할 수 있습니다
-    # 예: 작성한 게시글, 좋아요한 게시글 등
+    # 사용자의 활동 내역을 가져오기
+    # ex) 작성글, 좋아요 글 등
     return render(request, 'accounts/activities.html', {
         'message': '활동 내역 조회 기능은 추후 구현 예정'
     })
@@ -304,7 +317,7 @@ def kakao_callback(request):
             )
         
         # 로그인 (백엔드 명시)
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        login_user(request, user)
         return redirect('base')
         
     except Exception as e:
@@ -372,7 +385,7 @@ def google_callback(request):
             )
         
         # 로그인 (백엔드 명시)
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        login_user(request, user)
         return redirect('base')
         
     except Exception as e:
