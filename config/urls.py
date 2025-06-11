@@ -1,9 +1,17 @@
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from accounts import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("base/", views.base, name='base'),
+    path("base/", views.base, name='base'), # base
+    path('accounts/', include('accounts.urls')), # accounts
+    path('accounts/', include('allauth.urls')), # allauth URLs
+    path('feeds/', include('feeds.urls')), # feeds
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
