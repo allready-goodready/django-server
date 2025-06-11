@@ -1,0 +1,117 @@
+/* 공통 버튼 스타일 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #FE8115 !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-primary:hover {
+    background-color: #e96e00 !important;
+}
+
+.btn-secondary {
+    background: #fafafa;
+    color: #262626;
+    border: 1px solid #dbdbdb;
+}
+
+.btn-secondary:hover {
+    background: #f0f0f0;
+}
+
+.btn-outline-primary {
+    background-color: transparent !important;
+    color: #FE8115 !important;
+    border: 1px solid #FE8115 !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #FE8115 !important;
+    color: white !important;
+}
+
+.btn-outline-danger {
+    background-color: transparent;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 공통 폼 스타일 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #262626;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #FE8115;
+}
+
+.form-text {
+    font-size: 12px;
+    color: #8e8e8e;
+    margin-top: 5px;
+}
+
+/* 공통 모달 스타일 */
+.modal-content {
+    background-color: #fff !important;
+    border-radius: 12px;
+    border: 1.5px solid #dbdbdb !important;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.modal-header {
+    background-color: #FE8115 !important;
+    border-bottom: 1px solid #dbdbdb;
+    padding: 16px;
+}
+
+.modal-title {
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .modal-content {
+        max-width: 90%;
+    }
+} 

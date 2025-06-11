@@ -1,0 +1,128 @@
+/* 모달 기본 스타일 */
+.modal-content {
+    background-color: #fff !important;
+    border-radius: 12px;
+    border: 1.5px solid #dbdbdb !important;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.modal-header {
+    background-color: #FE8115 !important;
+    border-bottom: 1px solid #dbdbdb;
+    padding: 16px;
+}
+
+.modal-title {
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* 버튼 스타일 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background-color: #FE8115 !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-primary:hover {
+    background-color: #e96e00 !important;
+}
+
+.btn-outline-primary {
+    background-color: transparent !important;
+    color: #FE8115 !important;
+    border: 1px solid #FE8115 !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #FE8115 !important;
+    color: white !important;
+}
+
+/* 소셜 로그인 섹션 */
+.social-login {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background-color: #dbdbdb;
+}
+
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+.divider span {
+    background-color: #fff;
+    padding: 0 10px;
+    color: #8e8e8e;
+    font-size: 13px;
+    position: relative;
+    z-index: 1;
+}
+
+.social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.social-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.social-btn:hover { transform: scale(1.1); }
+
+.social-btn img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.social-btn.kakao {
+    background-color: #FEE500;
+    padding: 0;
+}
+
+.social-btn.google {
+    background-color: #fff;
+    border: 1px solid #dbdbdb;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 90%;
+    }
+    
+    .social-buttons { gap: 20px; }
+}
