@@ -22,7 +22,8 @@
     <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
 
     <!-- 구글 Maps + Places API 로딩 -->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=places&language=ko"></script>
+
 
 
   {% block extra_head %}{% endblock %}
@@ -31,8 +32,10 @@
   {% bootstrap_javascript %}  
   {% include "common/navbar.html" %}
 
-  {% block content %}{% endblock %}
+  {% block content %}{% endblock content %}
 
   {% include "feed/feed_write.html" %}
+
+  {% block script %}{% endblock script %}
 </body>
 </html>

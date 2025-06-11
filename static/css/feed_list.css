@@ -13,7 +13,7 @@
 .feed-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
   padding: 10px;
   opacity: 0;
   transition: opacity 0.3s;
@@ -23,6 +23,11 @@
 
 .image-box:hover .feed-overlay {
   opacity: 1;
+}
+
+.username { 
+  color : white;
+  font-weight: bold;
 }
 
 .profile-img {
@@ -49,6 +54,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-height: 3.8em;  /* 대충 2~3줄 제한 */
+  color : white;
 }
 
 .image-box a {

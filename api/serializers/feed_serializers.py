@@ -5,20 +5,13 @@ from rest_framework import serializers
 from feed.models import Feed, FeedImage
 
 
-# 조회용으로 유지
-class FeedImageSerializer(serializers.ModelSerializer) : 
-    
-    class Meta : 
-        model = FeedImage
-        fields = ['id', 'image', 'order']
-    
 
-# 생성 전용
 class FeedSerializer(serializers.ModelSerializer) : 
     # user = serializers.SerializerMethodField()    # 작성자 정보
     place = serializers.CharField(required=True, allow_blank=False)   # 장소 정보
     caption = serializers.CharField(required=True, allow_blank=False)   # 캡션
-    images = serializers.ListField(child=serializers.ImageField(), write_only=True) #피드 이미지들
+    images = serializers.SerializerMethodField() # 피드 이미지들
+
 
     # 좋아요, 북마크, 내 글 관련은 이후 추가할 예정
 
@@ -60,6 +53,9 @@ class FeedSerializer(serializers.ModelSerializer) :
         return feed
 
 
+    def get_images(self, obj):
+        return [img.image.url for img in obj.images.all()]
+    
     # def get_user(self, obj):
     #     return {
     #         'id': obj.user.id,

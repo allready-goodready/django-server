@@ -226,7 +226,7 @@ document.getElementById("button_write_feed")?.addEventListener("click", async fu
         document.getElementById("modal_create_feed").style.display = "none";
 
         // 화면 새로고침 or 목록 갱신 등 추가 작업 가능
-        // location.reload();
+        location.reload();
         } else {
         const err = await response.json();
         alert("등록 실패: " + (err.detail || "오류가 발생했습니다."));
