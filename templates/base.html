@@ -1,11 +1,205 @@
 {% load django_bootstrap5 %}
+{% load static %}
+{% load socialaccount %}
 
 <!DOCTYPE html>
 <html>
 <head>
     {% bootstrap_css %}
+    <link rel="stylesheet" href="{% static 'accounts/css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/modal.css' %}">
+    {% block css %}{% endblock css %}
 </head>
 <body>
     {% bootstrap_javascript %}
     {% include 'common/navbar.html' %}
+    {% block content %}{% endblock content %}
+    {% block javascript %}{% endblock javascript %}
+
+    <!-- 로그인 모달 -->
+    <div class="modal fade custom-modal" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true" data-bs-backdrop="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">allready</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 일반 로그인 폼 -->
+                    <form method="POST" action="{% url 'accounts:signin' %}" class="login-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_username">아이디</label>
+                            <input type="text" name="username" id="id_username" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_password">비밀번호</label>
+                            <input type="password" name="password" id="id_password" class="form-control" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary w-100">로그인</button>
+                        </div>
+                    </form>
+
+                    <!-- 회원가입 링크 -->
+                    <div class="auth-links">
+                        <p>계정이 없으신가요? <a href="{% url 'accounts:signup' %}">회원가입</a></p>
+                    </div>
+                    
+                    <!-- 소셜 로그인 섹션 -->
+                    <div class="social-login">
+                        <div class="divider">
+                            <span>또는</span>
+                        </div>
+                        <div class="social-buttons">
+                            <a href="{% url 'accounts:kakao_login' %}" class="social-btn kakao">
+                                <img src="{% static 'images/kakao.png' %}" alt="Kakao">
+                            </a>
+                            <a href="{% url 'accounts:google_login' %}" class="social-btn google">
+                                <img src="{% static 'images/google.svg' %}" alt="Google">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 회원가입 모달 -->
+    <div class="modal fade custom-modal" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true" data-bs-backdrop="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signupModalLabel">회원가입</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" id="signup-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_username">아이디</label>
+                            <input type="text" name="username" id="id_username" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_email">이메일</label>
+                            <input type="email" name="email" id="id_email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_password1">비밀번호</label>
+                            <input type="password" name="password1" id="id_password1" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_password2">비밀번호 확인</label>
+                            <input type="password" name="password2" id="id_password2" class="form-control" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary w-100">회원가입</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // CSRF 토큰 설정
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // 모달 초기화
+        var loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
+            backdrop: false,
+            keyboard: true
+        });
+
+        // 로그인 모달 열기 함수
+        window.openLoginModal = function() {
+            loginModal.show();
+        };
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('loginModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                loginModal.hide();
+            }
+        });
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                loginModal.hide();
+            }
+        });
+
+        // 로그인 폼 제출 처리
+        document.querySelector('.login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('{% url "accounts:signin" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // 현재 페이지가 회원가입 페이지인 경우 메인 페이지로 리다이렉션
+                    if (window.location.pathname === '{% url "accounts:signup" %}') {
+                        window.location.href = '{% url "base" %}';
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('로그인 중 오류가 발생했습니다.');
+            });
+        });
+
+        // 모달 내 회원가입 폼 제출 처리
+        const modalSignupForm = document.querySelector('#signupModal #signup-form');
+        if (modalSignupForm) {
+            modalSignupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                window.location.href = '{% url "accounts:signup" %}';
+            });
+        }
+    });
+    </script>
+
+    {% if signup_completed %}
+    <script>
+        // 페이지 로드 시 회원가입 완료 메시지 표시
+        window.onload = function() {
+            alert('회원가입이 완료되었습니다. 환영합니다!');
+        };
+    </script>
+    {% endif %}
+
+    {% block extra_js %}
+    {% endblock %}
 </body>
+</html> 
