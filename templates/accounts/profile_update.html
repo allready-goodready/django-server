@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="profile-update-container">
+    <div class="profile-update-header">
+        <h2>프로필 수정</h2>
+    </div>
+    
+    <form method="POST" enctype="multipart/form-data" class="profile-update-form">
+        {% csrf_token %}
+        
+        <div class="profile-image-section">
+            <div class="profile-image-wrapper">
+                <div class="current-image">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image.url }}" alt="현재 프로필 이미지">
+                    {% else %}
+                        <img src="{% static 'images/default_profile.png' %}" alt="기본 프로필 이미지">
+                    {% endif %}
+                </div>
+                <div class="profile-image-actions">
+                    <button type="button" class="btn btn-outline-primary" id="changeProfileImage">
+                        프로필 사진 변경
+                    </button>
+                    <input type="file" name="profile_image" id="profile_image_input" style="display: none;" accept="image/*">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="{{ form.nickname.id_for_label }}">닉네임</label>
+                {{ form.nickname }}
+                {% if form.nickname.errors %}
+                    <div class="error-message">
+                        {{ form.nickname.errors }}
+                    </div>
+                {% endif %}
+                <small class="form-text">원하는 닉네임을 입력해주세요. (중복 불가)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.bio.id_for_label }}">소개</label>
+                {{ form.bio }}
+                <small class="form-text">여행자로서의 당신을 소개해주세요.</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">저장하기</button>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
+</div>
+
+<!-- 프로필 이미지 변경 모달 -->
+<div class="modal fade" id="profileImageModal" tabindex="-1" aria-labelledby="profileImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileImageModalLabel">프로필 사진 변경</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-image-options">
+                    <button type="button" class="btn btn-outline-primary w-100 mb-3" id="uploadNewPhoto">
+                        사진 업로드
+                    </button>
+                    <button type="button" class="btn btn-outline-danger w-100" id="removeCurrentPhoto">
+                        현재 사진 삭제
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Bootstrap 모달 초기화
+    const profileImageModal = new bootstrap.Modal(document.getElementById('profileImageModal'), {
+        backdrop: true,
+        keyboard: true
+    });
+
+    const changeProfileImageBtn = document.getElementById('changeProfileImage');
+    const uploadNewPhotoBtn = document.getElementById('uploadNewPhoto');
+    const removeCurrentPhotoBtn = document.getElementById('removeCurrentPhoto');
+    const profileImageInput = document.getElementById('profile_image_input');
+    const currentImage = document.querySelector('.current-image img');
+
+    // 프로필 이미지 변경 버튼 클릭
+    if (changeProfileImageBtn) {
+        changeProfileImageBtn.addEventListener('click', function() {
+            profileImageModal.show();
+        });
+    }
+
+    // 새 사진 업로드 버튼 클릭
+    if (uploadNewPhotoBtn) {
+        uploadNewPhotoBtn.addEventListener('click', function() {
+            profileImageInput.click();
+            profileImageModal.hide();
+        });
+    }
+
+    // 파일 선택 시 미리보기
+    if (profileImageInput) {
+        profileImageInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // 이미지 크기 조절
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 캔버스 크기를 150x150으로 설정
+                        canvas.width = 150;
+                        canvas.height = 150;
+                        
+                        // 이미지를 원형으로 그리기
+                        ctx.beginPath();
+                        ctx.arc(75, 75, 75, 0, Math.PI * 2);
+                        ctx.closePath();
+                        ctx.clip();
+                        
+                        // 이미지 그리기
+                        ctx.drawImage(img, 0, 0, 150, 150);
+                        
+                        // 캔버스의 내용을 이미지로 변환
+                        currentImage.src = canvas.toDataURL('image/jpeg', 0.8);
+                    };
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    }
+
+    // 현재 사진 삭제 버튼 클릭
+    if (removeCurrentPhotoBtn) {
+        removeCurrentPhotoBtn.addEventListener('click', function() {
+            currentImage.src = "{% static 'images/default_profile.png' %}";
+            profileImageInput.value = '';
+            profileImageModal.hide();
+        });
+    }
+
+    // 모달 외부 클릭 시 닫기
+    document.getElementById('profileImageModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            profileImageModal.hide();
+        }
+    });
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            profileImageModal.hide();
+        }
+    });
+});
+</script>
+{% endblock %} 
