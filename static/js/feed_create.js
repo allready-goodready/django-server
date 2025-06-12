@@ -187,11 +187,9 @@ document.getElementById("button_write_feed")?.addEventListener("click", async fu
     console.log("lat in formData:", formData.get("lat"));
     console.log("lon in formData:", formData.get("lon"));
 
-
-    // 추후 로그인 연동 시 유저 정보를 함께 보낼 수 있도록 설정
-    // const userId = document.getElementById("input_user_id")?.textContent.trim();
-    // formData.append("user", userId);
-
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    
     const base64Images = window.croppedList || []; 
 
     base64Images.forEach((base64Image, idx) => {
@@ -214,9 +212,10 @@ document.getElementById("button_write_feed")?.addEventListener("click", async fu
 
 
     try {
-        const response = await fetch("/api/feed/create/", {
-        method: "POST",
-        body: formData,
+        const response = await fetch('/feed/api/create/', {
+          method: "POST",
+          body: formData,
+          credentials: 'include',
         });
 
         if (response.ok) {

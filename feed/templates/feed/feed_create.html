@@ -1,5 +1,6 @@
 <!-- templates/feed/feed_create.html -->
 <!-- 첨부한 사진 확인 및 여행지 선택, 캡션 작성용 세번째 모달 --> 
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <div id="modal_create_feed" class="modal modal_overlay_content">
     <!-- 바깥 X 버튼 -->
     <span class="modal_close_outer" id="close_create_modal_x">×</span>
@@ -21,7 +22,7 @@
                         <!-- 안전한 기본 이미지 또는 빈 데이터 URI 사용 -->
                         <img id="input_profile_image" class="profile_img" src="https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg" alt="profile">
                     </div>
-                    <span id="input_user_id" class="feed_name_txt"> likelion </span>
+                    <span id="input_user_id" class="feed_name_txt"> {{ username }} </span>
                 </div>
                 <div style="height: 440px">
                     <textarea id="input_caption" class="feed_content_textarea form-control" rows="10" placeholder="설명을 입력하세요..."></textarea>

@@ -4,8 +4,7 @@ from django.conf import settings
 # Create your models here.
 
 class Feed(models.Model) : 
-    # User 모델이 아직 정의되지 않아 user 필드는 임시로 주석 처리했습니다.
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     caption = models.CharField(max_length=200, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

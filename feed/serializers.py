@@ -7,7 +7,7 @@ from feed.models import Feed, FeedImage
 
 
 class FeedSerializer(serializers.ModelSerializer) : 
-    # user = serializers.SerializerMethodField()    # 작성자 정보
+    user = serializers.SerializerMethodField()    # 작성자 정보
     place = serializers.CharField(required=True, allow_blank=False)   # 장소 정보
     caption = serializers.CharField(required=True, allow_blank=False)   # 캡션
     images = serializers.SerializerMethodField() # 피드 이미지들
@@ -17,7 +17,7 @@ class FeedSerializer(serializers.ModelSerializer) :
 
     class Meta : 
         model = Feed
-        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'created_at'] # user 필드는 아직 추가 안 함
+        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'user', 'created_at'] # user 필드는 아직 추가 안 함
 
     # 빈 값 방지 / 최대 5장 이미지 / 이미지는 장 당 10MB까지
     def validate(self, data):
@@ -39,7 +39,9 @@ class FeedSerializer(serializers.ModelSerializer) :
 
     
     def create(self, validated_data):
-        images_files = validated_data.pop('images', [])
+        request = self.context.get('request')  # request 가져오기
+        user = request.user if request else None
+
         lat = validated_data.pop('lat', None)
         lon = validated_data.pop('lon', None)
         feed = Feed.objects.create(**validated_data)
@@ -56,9 +58,9 @@ class FeedSerializer(serializers.ModelSerializer) :
     def get_images(self, obj):
         return [img.image.url for img in obj.images.all()]
     
-    # def get_user(self, obj):
-    #     return {
-    #         'id': obj.user.id,
-    #         'username': obj.user.username,
-    #         # 다른 필드들 필요시 추가
-    #     }
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'username': obj.user.username,
+            # 다른 필드들 필요시 추가
+        }

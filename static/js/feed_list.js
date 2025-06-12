@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const pageSize = parseInt(urlParams.get("page_size")) || 12;
 
     const queryString = urlParams.toString();  // 쿼리 전체 추출
-    const apiUrl = `/api/feeds/?${queryString}`;
+    const apiUrl = `/feed/api/feeds/?${queryString}`;
 
     // 현재 페이지 번호 기반 API 요청
     fetch(apiUrl)
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                     <div class="overlay-top d-flex justify-content-between align-items-start">
                                         <div class="d-flex align-items-center">
                                             <img src="/static/images/user.jpg" class="profile-img me-2" alt="프로필">
-                                            <div class="username">likelion</div>
+                                            <div class="username"> ${feed.user.username} </div>
                                         </div>
                                         <img src="/static/images/bookmark.png" class="bookmark-icon" alt="북마크">
                                     </div>
