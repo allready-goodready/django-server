@@ -12,14 +12,6 @@
     display: none; /* 초기 숨김 */
   }
 
-  /* 확장된 상태에서 왼쪽 영역 스타일 */
-  #map-picker-area.expanded {
-    flex: 1 1 0 !important;
-    max-width: none !important;
-    width: 100%;
-    justify-content: center !important;
-  }
-
   /* 확장 시 오른쪽 영역과 구분선을 숨길 때 사용할 클래스 */
   .hidden-by-js {
     display: none !important;
@@ -41,6 +33,66 @@
     line-height: 1.5;
     color: #495057;
     background-color: #e9ecef;
+  }
+
+  #destination-selector {
+    display: inline-flex;
+    width: 1000px;
+    height: 60px;
+    padding: 0 15px;
+  }
+
+  /* 공통: flex 기본값, 트랜지션 */
+  #map-picker-area,
+  #search-picker-area {
+    flex: 1 1 0;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+    transition: flex 0.3s ease, max-width 0.3s ease, opacity 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+  }
+
+  #map-picker-area:hover,
+  #search-picker-area:hover {
+    flex: 1 1 100%;
+    max-width: 100%;
+    justify-content: center;
+  }
+
+  /* separator 기본 스타일 */
+  #separator {
+    width: 30px;
+    height: 0;
+    transform: rotate(90deg);
+    transform-origin: top left;
+    border-top: 1px solid #e5e5e5;
+    margin: 0 10px;
+    transition: opacity 0.3s ease;
+  }
+
+  /* 호버한 영역만 확장 */
+  #destination-selector:hover #map-picker-area:hover,
+  #destination-selector:hover #search-picker-area:hover {
+    flex: 2;
+    max-width: none;
+    justify-content: center;
+  }
+
+  /* 호버되지 않은 영역은 축소 및 숨김 */
+  #destination-selector:hover #map-picker-area:not(:hover),
+  #destination-selector:hover #search-picker-area:not(:hover) {
+    flex: 0;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  /* 호버 시 separator 숨김 */
+  #destination-selector:hover #separator {
+    opacity: 0;
+    pointer-events: none;
   }
 </style>
 <div id="set-message"></div>
@@ -69,18 +121,10 @@
     </div>
   </div>
   <!-- 구분선 -->
-  <div id="separator"
-       style="width: 30px;
-              height: 0;
-              transform: rotate(90deg);
-              transform-origin: top left;
-              border-top: 1px solid #e5e5e5;
-              margin: 0 10px"></div>
+  <div id="separator"></div>
   <!-- 오른쪽: 여행지 검색하기 -->
   <div id="search-picker-area"
-       class="d-flex flex-fill align-items-center justify-content-start"
-       style="max-width: 480px;
-              cursor: pointer">
+       class="d-flex flex-fill align-items-center justify-content-start">
     <div class="d-flex align-items-center gap-2">
       <img src="/static/images/lens.svg"
            alt="search"
@@ -173,24 +217,6 @@
       // 검색 확인 버튼 초기 비활성화
       confirmSearchButton.disabled = true;
 
-      // 1) 왼쪽 영역 마우스 오버 시 확장
-      mapPickerArea.addEventListener("mouseenter", () => {
-        mapPickerArea.classList.add("expanded");
-        separator.classList.add("hidden-by-js");
-        searchPickerArea.classList.add("hidden-by-js");
-        mapPickerArea.style.justifyContent = "center";
-      });
-
-      // 2) 왼쪽 영역 마우스 리브 시 (단, 지도가 열린 상태가 아니면 복원)
-      mapPickerArea.addEventListener("mouseleave", () => {
-        if (!mapSection.classList.contains("d-block")) {
-          mapPickerArea.classList.remove("expanded");
-          separator.classList.remove("hidden-by-js");
-          searchPickerArea.classList.remove("hidden-by-js");
-          mapPickerArea.style.justifyContent = "flex-end";
-        }
-      });
-
       // 3) 왼쪽 클릭 시 map-section 표시 및 Google Maps 초기화
       mapPickerArea.addEventListener("click", () => {
         // 자동완성 섹션 숨기기
@@ -251,24 +277,6 @@
             .catch((error) => {
               console.error("Error creating destination:", error);
             });
-        }
-      });
-
-      // 5) 오른쪽 마우스 오버 시 확장
-      searchPickerArea.addEventListener("mouseenter", () => {
-        searchPickerArea.classList.add("expanded");
-        separator.classList.add("hidden-by-js");
-        mapPickerArea.classList.add("hidden-by-js");
-        searchPickerArea.style.justifyContent = "center";
-      });
-
-      // 6) 오른쪽 마우스 리브 시 (단, 검색 섹션 열린 상태가 아니면 복원)
-      searchPickerArea.addEventListener("mouseleave", () => {
-        if (!searchSection.classList.contains("d-block")) {
-          searchPickerArea.classList.remove("expanded");
-          separator.classList.remove("hidden-by-js");
-          mapPickerArea.classList.remove("hidden-by-js");
-          searchPickerArea.style.justifyContent = "flex-start";
         }
       });
 
