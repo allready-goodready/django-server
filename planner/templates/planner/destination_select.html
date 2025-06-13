@@ -377,11 +377,7 @@
             let name = placeObj.displayName;
             let address = placeObj.formattedAddress;
 
-            console.log("placeObj.displayName: ", placeObj.displayName);
-            console.log("placeObj.formattedAddress: ", placeObj.formattedAddress);
-
             if (!name && !address) {
-              console.log("이름없는 위치 선택");
               const geoData = await new Promise(resolve => {
                 geocoder.geocode({ location: event.latLng }, (results, status) => {
                   if (status === "OK" && results && results.length > 0) {
