@@ -30,12 +30,33 @@
     background-color: #e9ecef;
   }
 
+  /* 상단 선택 영역 고정 크기 */
   #destination-selector {
     display: flex;
     width: 1000px;
     height: 60px;
     padding: 0 15px;
     justify-content: center;
+  }
+
+  /* 검색 및 지도 섹션 너비 */
+  #search-section,
+  #map-section {
+    width: 1000px;
+  }
+
+  /* 아이콘 크기 */
+  .picker-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Picker 텍스트 스타일 */
+  .picker-text {
+    font-size: 20px;
+    font-family: 'Noto Sans KR';
+    font-weight: 300;
+    line-height: 20px;
   }
 
   /* 공통: flex 기본값, 트랜지션 */
@@ -51,7 +72,7 @@
     height: 100%;
   }
 
-  #map-picker-area{
+  #map-picker-area {
     justify-content: end;
   }
 
@@ -106,16 +127,9 @@
   <!-- 왼쪽: 지도에서 여행지 고르기 -->
   <div id="map-picker-area" class="d-flex flex-fill align-items-center">
     <div class="d-flex align-items-center gap-2">
-      <img src="/static/images/globe.svg"
-           alt="globe"
-           style="width: 24px;
-                  height: 24px" />
+      <img src="/static/images/globe.svg" alt="globe" class="picker-icon" />
       <div id="map-picker-text"
-           class="d-flex flex-column justify-content-center text-dark"
-           style="font-size: 20px;
-                  font-family: 'Noto Sans KR';
-                  font-weight: 300;
-                  line-height: 20px">지도에서 여행지 고르기</div>
+           class="d-flex flex-column justify-content-center text-dark picker-text">지도에서 여행지 고르기</div>
     </div>
   </div>
   <!-- 구분선 -->
@@ -123,21 +137,14 @@
   <!-- 오른쪽: 여행지 검색하기 -->
   <div id="search-picker-area" class="d-flex flex-fill align-items-center">
     <div class="d-flex align-items-center gap-2">
-      <img src="/static/images/lens.svg"
-           alt="search"
-           style="width: 24px;
-                  height: 24px" />
+      <img src="/static/images/lens.svg" alt="search" class="picker-icon" />
       <div id="search-picker-text"
-           class="d-flex flex-column justify-content-center text-dark"
-           style="font-size: 20px;
-                  font-family: 'Noto Sans KR';
-                  font-weight: 300;
-                  line-height: 20px">여행지 검색하기</div>
+           class="d-flex flex-column justify-content-center text-dark picker-text">여행지 검색하기</div>
     </div>
   </div>
 </div>
 <!-- 3) 검색 자동완성 섹션 (초기엔 hidden) -->
-<div id="search-section" class="mt-3 d-none" style="width: 1000px;">
+<div id="search-section" class="mt-3 d-none">
   <div class="input-group mb-2 position-relative">
     <!-- PlaceAutocompleteElement이 삽입될 컨테이너 -->
     <div id="autocomplete-container" class="form-control"></div>
@@ -146,7 +153,7 @@
   <div id="search-error" class="text-danger small d-none">유효한 장소를 선택해주세요.</div>
 </div>
 <!-- 2) 지도와 위치 출력란, 확인 버튼이 나타날 섹션 (초기엔 hidden) -->
-<div id="map-section" class="mt-3 d-none" style="width: 1000px;">
+<div id="map-section" class="mt-3 d-none">
   <!-- 실제 지도가 그려질 영역 -->
   <div id="map"></div>
   <!-- 에러 메시지 출력용 (대한민국 클릭 시) -->
@@ -172,7 +179,6 @@
       country: null,
       region: null,
     };
-
 
     // --- 전역 변수 정의 (initMap과 토글 함수에서 접근할 수 있도록) ---
     let map;
@@ -233,8 +239,6 @@
         } else {
           initMap();
         }
-
-
       });
 
       // 4) 여행지 선택 버튼 클릭 시 API 요청
@@ -279,7 +283,6 @@
         mapSection.classList.add("d-none");
         confirmButton.disabled = true;
         locationInfo.textContent = "";
-        
 
         if (!searchSection.classList.contains("d-block")) {
           searchSection.classList.remove("d-none");
@@ -290,6 +293,7 @@
 
       // 8) 자동완성 확인 버튼 클릭 시 API 요청 (버튼은 place 선택 후 활성화)
       confirmSearchButton.addEventListener("click", () => {
+        const planId = window.planId;
         if (selectedPlaceData.lat && planId) {
           const csrftoken = getCookie("csrftoken");
           const bodyData = {
@@ -375,7 +379,7 @@
 
             console.log("placeObj.displayName: ", placeObj.displayName);
             console.log("placeObj.formattedAddress: ", placeObj.formattedAddress);
-            
+
             if (!name && !address) {
               console.log("이름없는 위치 선택");
               const geoData = await new Promise(resolve => {
@@ -394,10 +398,10 @@
             }
 
             // 주소 구성 요소에서 country, region 분리
-            const components = placeObj.addressComponents || [];
+            let components = placeObj.addressComponents || [];
             if (!components.length) {
               // 좌표(event.latLng) 기준으로 역지오코딩 수행
-              const geoResult = await new Promise((resolve) => {
+              components = await new Promise((resolve) => {
                 geocoder.geocode({ location: event.latLng }, (results, status) => {
                   if (status === "OK" && results && results.length > 0) {
                     resolve(results[0].address_components);
@@ -406,7 +410,6 @@
                   }
                 });
               });
-              components = geoResult;
             }
 
             let isSouthKorea = components.some(
@@ -454,7 +457,7 @@
           }
 
           return;
-        }else{
+        } else {
           // 2) placeId가 없으면 Geocoder 사용
           errorMessage.classList.add("d-none");
           confirmButton.disabled = true;
@@ -482,8 +485,7 @@
 
               // 마커 표시
               placeSingleMarker(event.latLng);
-              
-              
+
               let country = "";
               let region = "";
               for (const comp of primaryResult.address_components) {
@@ -578,10 +580,10 @@
           const placeObj = placePrediction.toPlace();
           await placeObj.fetchFields({
             fields: [
-            "displayName",
-            "formattedAddress",
-            "location",
-            "addressComponents",
+              "displayName",
+              "formattedAddress",
+              "location",
+              "addressComponents",
             ],
           });
 
