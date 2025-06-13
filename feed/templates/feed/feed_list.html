@@ -6,6 +6,7 @@
 
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/feed_list.css' %}">
+  <link rel="stylesheet" href="{% static 'css/feed_detail.css' %}">
 {% endblock css %}
 
 
@@ -22,6 +23,8 @@
   </nav>
 
 </div>
+
+{% include "feed/feed_detail.html" %}
 
 {% endblock content %}
 

@@ -1,15 +1,44 @@
-<!-- templates/feed/feed_list.html -->
-{% extends "base.html" %}
-{% load static %}
+<!-- templates/feed/feed_detail.html -->
+<!-- 피드 상세 모달 --> 
+<div id="modal_detail_feed" class="modal modal_overlay_content">
+    <!-- 바깥 X 버튼 -->
+    <span class="modal_close_outer" id="close_detail_modal_x">×</span>
 
-{% block title %}피드 상세{% endblock title %}
+    <div class="detail_modal_window">
+        <div class="feed_detail_nav d-flex align-items-center position-relative px-3">
+            <div class="modal_title_text position-absolute start-50 translate-middle-x">피드 상세보기</div>
+        </div>
 
-{% block css %}{% endblock css %}
+        <div class="detail_modal_image_content">
+            <!-- 이미지 -->
+            <div id="detail_image" class="detail_image_area"></div>
 
 
-{% block content %}{% endblock content %}
+            <div class="detail_content_area">
+                <div class="detail_feed_name">
+                    <div class="detail_profile_box">
+                        <!-- 안전한 기본 이미지 또는 빈 데이터 URI 사용 -->
+                        <img id="detail_profile_image" class="profile_img" src="https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg" alt="profile">
+                    </div>
+                    <span id="input_user_id" class="detail_name_txt"> {{ username }} </span>
+                </div>
 
+                
+                <div class="detail_caption_box" class="me-3">
+                    <p id="detail_caption" class="mb-0"></p>
+                </div>
+                <div id="detail_place" class="mt-3">
+                    <!-- 여행지 출력 -->
+                    <p class="mb-0 text-muted">여행지: <span class="fw-bold">{{ place }}</span></p>
+                </div>
+                
 
-{% block script %}
-
-{% endblock script %}
+                <!-- 좋아요, 북마크 아이콘 -->
+                <div class="d-flex justify-content-end align-items-right p-3">
+                    <img src="/static/images/liked.svg" alt="like" style="width: 24px; height: 24px; cursor: pointer;" class="me-1">
+                    <img src="/static/images/bookmark.png" alt="bookmark" style="width: 30px; height: 30px; cursor: pointer;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
