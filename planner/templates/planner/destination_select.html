@@ -12,11 +12,6 @@
     display: none; /* 초기 숨김 */
   }
 
-  /* 확장 시 오른쪽 영역과 구분선을 숨길 때 사용할 클래스 */
-  .hidden-by-js {
-    display: none !important;
-  }
-
   /* 클릭 후 지도 섹션이 나타날 때, 지도 영역 높이 지정 */
   #map {
     width: 100%;
@@ -36,10 +31,11 @@
   }
 
   #destination-selector {
-    display: inline-flex;
+    display: flex;
     width: 1000px;
     height: 60px;
     padding: 0 15px;
+    justify-content: center;
   }
 
   /* 공통: flex 기본값, 트랜지션 */
@@ -48,10 +44,19 @@
     flex: 1 1 0;
     max-width: 480px;
     display: flex;
+    justify-content: center;
     align-items: center;
     transition: flex 0.3s ease, max-width 0.3s ease, opacity 0.3s ease;
     cursor: pointer;
     height: 100%;
+  }
+
+  #map-picker-area{
+    justify-content: end;
+  }
+
+  #search-picker-area {
+    justify-content: start;
   }
 
   #map-picker-area:hover,
@@ -66,7 +71,6 @@
     width: 30px;
     height: 0;
     transform: rotate(90deg);
-    transform-origin: top left;
     border-top: 1px solid #e5e5e5;
     margin: 0 10px;
     transition: opacity 0.3s ease;
@@ -98,15 +102,9 @@
 <div id="set-message"></div>
 <!-- 1) 상단 선택 영역 -->
 <div id="destination-selector"
-     class="d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded"
-     style="width: 1000px;
-            height: 60px;
-            padding: 0 15px">
+     class="d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded">
   <!-- 왼쪽: 지도에서 여행지 고르기 -->
-  <div id="map-picker-area"
-       class="d-flex flex-fill align-items-center justify-content-end"
-       style="max-width: 480px;
-              cursor: pointer">
+  <div id="map-picker-area" class="d-flex flex-fill align-items-center">
     <div class="d-flex align-items-center gap-2">
       <img src="/static/images/globe.svg"
            alt="globe"
@@ -123,8 +121,7 @@
   <!-- 구분선 -->
   <div id="separator"></div>
   <!-- 오른쪽: 여행지 검색하기 -->
-  <div id="search-picker-area"
-       class="d-flex flex-fill align-items-center justify-content-start">
+  <div id="search-picker-area" class="d-flex flex-fill align-items-center">
     <div class="d-flex align-items-center gap-2">
       <img src="/static/images/lens.svg"
            alt="search"
@@ -237,10 +234,7 @@
           initMap();
         }
 
-        mapPickerArea.classList.remove("expanded");
-        separator.classList.remove("hidden-by-js");
-        searchPickerArea.classList.remove("hidden-by-js");
-        mapPickerArea.style.justifyContent = "flex-end";
+
       });
 
       // 4) 여행지 선택 버튼 클릭 시 API 요청
@@ -285,11 +279,7 @@
         mapSection.classList.add("d-none");
         confirmButton.disabled = true;
         locationInfo.textContent = "";
-        mapPickerArea.classList.remove("expanded");
-        separator.classList.remove("hidden-by-js");
-        mapPickerArea.classList.remove("hidden-by-js");
-        searchPickerArea.classList.remove("expanded");
-        searchPickerArea.style.justifyContent = "flex-start";
+        
 
         if (!searchSection.classList.contains("d-block")) {
           searchSection.classList.remove("d-none");
@@ -574,6 +564,12 @@
         confirmSearchButton.disabled = true;
         searchError.classList.add("d-none");
 
+        if (placePrediction.types?.includes("country")) {
+          searchError.textContent = "대한민국은 여행지로 선택할 수 없습니다.";
+          searchError.classList.remove("d-none");
+          return;
+        }
+
         // 4) AutocompletePrediction에서 placeId 추출
         const rawPlaceId = placePrediction.placeId;
 
@@ -581,12 +577,12 @@
           // 5) 최소 필드(fetchFields)로 정보 가져오기
           const placeObj = placePrediction.toPlace();
           await placeObj.fetchFields({
-            fields: ["displayName", "formattedAddress", "location"],
-          });
-
-          // 6) 추가 정보(address_components 등)는 Place 객체 생성 후 fetchFields로 가져오기
-          await placeObj.fetchFields({
-            fields: ["addressComponents"],
+            fields: [
+            "displayName",
+            "formattedAddress",
+            "location",
+            "addressComponents",
+            ],
           });
 
           // 7) address_components에서 country, region 파싱
@@ -594,7 +590,7 @@
           const countryComp = addressComps.find((c) =>
             c.types.includes("country")
           );
-          const countryCode = countryComp.Gg;  // "KR"
+          const countryCode = countryComp.Fg;
           const regionComp =
             addressComps.find(
               (c) =>
