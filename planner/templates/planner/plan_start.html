@@ -87,6 +87,7 @@
   </style>
 {% endblock css %}
 {% block content %}
+  <div id="origin-section" class="disabled-by-js opacity-50">{% include 'planner/origin_select.html' %}</div>
   <div id="destination-section" class="disabled-by-js opacity-50">{% include 'planner/destination_select.html' %}</div>
   <!-- 예산·일정·객수 컨테이너 -->
   <form id="plan-form" class="plan-container px-2">
@@ -229,10 +230,9 @@
           // 생성된 plan의 ID를 전역 변수로 설정하고 destination 섹션 보이기
           window.planId = data.id;
           const destSection = document.getElementById("destination-section");
+          const orgSection = document.getElementById("origin-section");
           destSection.classList.remove("disabled-by-js", "opacity-50");
-          if (typeof initDestinationSection === "function") {
-            initDestinationSection();
-          }
+          orgSection.classList.remove("disabled-by-js", "opacity-50");
         })
         .catch((error) => {
           console.error("Error creating TravelPlan:", error);
