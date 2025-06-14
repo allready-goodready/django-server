@@ -154,21 +154,23 @@
 <div class="search-section mt-3 d-none">
   <div class="input-group mb-2 position-relative">
     <!-- PlaceAutocompleteElement이 삽입될 컨테이너 -->
-    <div id="autocomplete-container" class="form-control"></div>
+    <div id="destination-search-autocomplete-container" class="form-control"></div>
     <button id="confirm-search-btn" class="btn btn-primary" type="button">여행지 선택</button>
   </div>
-  <div id="search-error" class="text-danger small d-none">유효한 장소를 선택해주세요.</div>
+  <div id="destination-autocomplete-error-message"
+       class="text-danger small d-none">유효한 장소를 선택해주세요.</div>
 </div>
 <!-- 2) 지도와 위치 출력란, 확인 버튼이 나타날 섹션 (초기엔 hidden) -->
 <div class="map-section mt-3 d-none">
   <!-- 실제 지도가 그려질 영역 -->
   <div class="map"></div>
   <!-- 에러 메시지 출력용 (대한민국 클릭 시) -->
-  <div id="error-message" class="alert alert-danger mt-2 d-none">대한민국은 여행지로 선택할 수 없습니다.</div>
+  <div id="destination-map-error-alert"
+       class="alert alert-danger mt-2 d-none">대한민국은 여행지로 선택할 수 없습니다.</div>
   <!-- 위치 출력란 및 확인 버튼 -->
   <div class="d-flex align-items-center justify-content-between mt-2">
     <div class="location-info me-2">선택된 위치 정보가 여기에 표시됩니다.</div>
-    <button id="confirm-location-btn"
+    <button id="destination-confirm-btn"
             type="button"
             class="btn btn-primary"
             disabled>여행지 선택</button>
@@ -194,38 +196,38 @@
     let geocoder;
     // placesService 삭제 (더 이상 사용하지 않음)
     let autocomplete;
-    let autocompleteContainer;
 
     // 2) 전역 DOM 요소 변수 선언
-    let mapPickerArea, searchPickerArea, mapSection, searchSection;
-    let confirmButton, confirmSearchButton, locationInfo, errorMessage;
-    let searchError, setMessageDiv;
+    let mapPickerArea, searchPickerArea, separator, mapSection, searchSection;
+    let destinationConfirmButton, searchConfirmButton, locationInfo, destinationMapErrorAlert;
+    let destinationAutocompleteErrorMessage, setMessageDiv, destinationSearchAutocompleteContainer;
 
     document.addEventListener("DOMContentLoaded", () => {
       // DOM 로딩 후에 전역 변수에 요소 할당
-      mapPickerArea      = document.querySelector(".map-picker-area");
-      searchPickerArea   = document.querySelector(".search-picker-area");
-      separator          = document.querySelector(".separator");
-      mapSection         = document.querySelector(".map-section");
-      searchSection      = document.querySelector(".search-section");
-      confirmButton      = document.getElementById("confirm-location-btn");
-      locationInfo       = document.querySelector(".location-info");
-      errorMessage       = document.getElementById("error-message");
-      autocompleteContainer = document.getElementById("autocomplete-container");
-      confirmSearchButton  = document.getElementById("confirm-search-btn");
-      searchError          = document.getElementById("search-error");
-      setMessageDiv        = document.querySelector(".set-message");
+      mapPickerArea                       = document.querySelector(".map-picker-area");
+      searchPickerArea                    = document.querySelector(".search-picker-area");
+      separator                           = document.querySelector(".separator");
+      mapSection                          = document.querySelector(".map-section");
+      searchSection                       = document.querySelector(".search-section");
+      destinationConfirmButton            = document.getElementById("destination-confirm-btn");
+      locationInfo                        = document.querySelector(".location-info");
+      destinationMapErrorAlert            = document.getElementById("destination-map-error-alert");
+      destinationSearchAutocompleteContainer = document.getElementById("destination-search-autocomplete-container");
+      searchConfirmButton                 = document.getElementById("confirm-search-btn");
+      destinationAutocompleteErrorMessage = document.getElementById("destination-autocomplete-error-message");
+      setMessageDiv                       = document.querySelector(".set-message");
 
 
       // 검색 확인 버튼 초기 비활성화
-      confirmSearchButton.disabled = true;
+      searchConfirmButton.disabled = true;
 
       // 3) 왼쪽 클릭 시 map-section 표시 및 Google Maps 초기화
       mapPickerArea.addEventListener("click", () => {
         // 자동완성 섹션 숨기기
         searchSection.classList.add("d-none");
-        confirmSearchButton.disabled = true;
-        searchError.classList.add("d-none");
+        searchSection.classList.remove("d-block");
+        searchConfirmButton.disabled = true;
+        destinationAutocompleteErrorMessage.classList.add("d-none");
 
         // map-section을 보여주고, 필요 시 리사이즈/초기화
         mapSection.classList.remove("d-none");
@@ -242,7 +244,7 @@
       });
 
       // 4) 여행지 선택 버튼 클릭 시 API 요청
-      confirmButton.addEventListener("click", () => {
+      destinationConfirmButton.addEventListener("click", () => {
         const planId = window.planId;
         if (selectedPlaceData.lat && planId) {
           const csrftoken = getCookie("csrftoken");
@@ -277,18 +279,17 @@
       // 7) 오른쪽 클릭 시 search-section 표시 및 Autocomplete 초기화
       searchPickerArea.addEventListener("click", () => {
         mapSection.classList.add("d-none");
-        confirmButton.disabled = true;
+        mapSection.classList.remove("d-block");
+        destinationConfirmButton.disabled = true;
         locationInfo.textContent = "";
   
-        if (!searchSection.classList.contains("d-block")) {
-          searchSection.classList.remove("d-none");
-          searchSection.classList.add("d-block");
-          initAutocomplete();
-        }
+        searchSection.classList.remove("d-none");
+        searchSection.classList.add("d-block");
+        initAutocomplete();
       });
 
       // 8) 자동완성 확인 버튼 클릭 시 API 요청 (버튼은 place 선택 후 활성화)
-      confirmSearchButton.addEventListener("click", () => {
+      searchConfirmButton.addEventListener("click", () => {
         const planId = window.planId;
         if (selectedPlaceData.lat && planId) {
           const csrftoken = getCookie("csrftoken");
@@ -404,7 +405,7 @@
               // 대한민국인 경우 에러 메시지 출력 후 마커 제거
               if (singleMarker) singleMarker.setMap(null);
               clickedPosition = null;
-              errorMessage.classList.remove("d-none");
+              destinationMapErrorAlert.classList.remove("d-none");
               return;
             }
 
@@ -435,8 +436,8 @@
               `위도: ${selectedPlaceData.lat.toFixed(
                 6
               )}, 경도: ${selectedPlaceData.lng.toFixed(6)}`;
-            confirmButton.disabled = false;
-            errorMessage.classList.add("d-none");
+              destinationConfirmButton.disabled = false;
+              destinationMapErrorAlert.classList.add("d-none");
           } catch (err) {
             console.error("Place.fetchFields 에러:", err);
           }
@@ -444,8 +445,8 @@
           return;
         } else {
           // 2) placeId가 없으면 Geocoder 사용
-          errorMessage.classList.add("d-none");
-          confirmButton.disabled = true;
+          destinationMapErrorAlert.classList.add("d-none");
+          destinationConfirmButton.disabled = true;
           locationInfo.textContent = "";
 
           geocoder.geocode({ location: event.latLng }, (results, status) => {
@@ -464,7 +465,7 @@
               if (isSouthKorea) {
                 if (singleMarker) singleMarker.setMap(null);
                 clickedPosition = null;
-                errorMessage.classList.remove("d-none");
+                destinationMapErrorAlert.classList.remove("d-none");
                 return;
               }
 
@@ -497,7 +498,7 @@
                 `위도: ${selectedPlaceData.lat.toFixed(
                   6
                 )}, 경도: ${selectedPlaceData.lng.toFixed(6)}`;
-              confirmButton.disabled = false;
+                destinationConfirmButton.disabled = false;
             } else {
               // geocode 결과가 없거나 에러일 때도 마커 표시
               placeSingleMarker(event.latLng);
@@ -513,7 +514,7 @@
               locationInfo.textContent = `위도: ${selectedPlaceData.lat.toFixed(
                 6
               )}, 경도: ${selectedPlaceData.lng.toFixed(6)}`;
-              confirmButton.disabled = false;
+              destinationConfirmButton.disabled = false;
             }
           });
         }
@@ -537,17 +538,17 @@
     // Google Places Autocomplete 초기화 함수
     async function initAutocomplete() {
       const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
-      autocompleteContainer.innerHTML = "";
-      autocompleteContainer.appendChild(placeAutocomplete);
+      destinationSearchAutocompleteContainer.innerHTML = "";
+      destinationSearchAutocompleteContainer.appendChild(placeAutocomplete);
       autocomplete = placeAutocomplete;
   
       autocomplete.addEventListener("gmp-select", async ({ placePrediction }) => {
-        confirmSearchButton.disabled = true;
-        searchError.classList.add("d-none");
+        searchConfirmButton.disabled = true;
+        destinationAutocompleteErrorMessage.classList.add("d-none");
   
         if (placePrediction.types?.includes("country")) {
-          searchError.textContent = "대한민국은 여행지로 선택할 수 없습니다.";
-          searchError.classList.remove("d-none");
+          destinationAutocompleteErrorMessage.textContent = "대한민국은 여행지로 선택할 수 없습니다.";
+          destinationAutocompleteErrorMessage.classList.remove("d-none");
           return;
         }
   
@@ -565,14 +566,14 @@
           ) || {};
   
           if (countryComp.Fg === "KR") {
-            searchError.textContent = "대한민국은 여행지로 선택할 수 없습니다.";
-            searchError.classList.remove("d-none");
+            destinationAutocompleteErrorMessage.textContent = "대한민국은 여행지로 선택할 수 없습니다.";
+            destinationAutocompleteErrorMessage.classList.remove("d-none");
             return;
           }
   
           if (!placeObj.location) {
-            searchError.textContent = "유효한 장소를 선택해주세요.";
-            searchError.classList.remove("d-none");
+            destinationAutocompleteErrorMessage.textContent = "유효한 장소를 선택해주세요.";
+            destinationAutocompleteErrorMessage.classList.remove("d-none");
             return;
           }
   
@@ -586,11 +587,11 @@
             region: regionComp.long_name || "",
           };
   
-          confirmSearchButton.disabled = false;
+          searchConfirmButton.disabled = false;
         } catch (err) {
           console.error("Autocomplete 에러:", err);
-          searchError.textContent = "장소 정보를 가져오는 중 오류가 발생했습니다.";
-          searchError.classList.remove("d-none");
+          destinationAutocompleteErrorMessage.textContent = "장소 정보를 가져오는 중 오류가 발생했습니다.";
+          destinationAutocompleteErrorMessage.classList.remove("d-none");
         }
       });
     }
