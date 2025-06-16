@@ -10,7 +10,6 @@ from django.http import JsonResponse
 # 앱 모델 및 폼
 from .models import Profile, EmailVerification
 from .forms import ProfileUpdateForm, SignUpForm
-from feeds.models import TravelFeed
 
 # 인증 백엔드
 from django.contrib.auth.backends import ModelBackend
@@ -219,19 +218,8 @@ def profile_view(request):
     user = request.user
     active_tab = request.GET.get('tab', 'feeds')
     
-    if active_tab == 'bookmarks':
-        user_feeds = TravelFeed.objects.filter(bookmarks=user).order_by('-created_at')
-    else:
-        user_feeds = TravelFeed.objects.filter(author=user).order_by('-created_at')
-    
-    bookmarked_count = TravelFeed.objects.filter(bookmarks=user).count()
-    feed_count = TravelFeed.objects.filter(author=user).count()
-    
     context = {
         'user': user,
-        'user_feeds': user_feeds,
-        'feed_count': feed_count,
-        'bookmarked_count': bookmarked_count,
         'active_tab': active_tab,
     }
     
