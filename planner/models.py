@@ -67,14 +67,3 @@ class Location(models.Model):
         null=True,
         help_text="Googleplaces API에서 제공하는 고유 장소 ID",
     )
-
-
-class Airport(models.Model):
-    location = models.OneToOneField(
-        Location, on_delete=models.CASCADE, related_name="airport"
-    )
-    IATA_code = models.CharField(max_length=50)
-    name = models.CharField(max_length=50)
-    lat = models.FloatField(help_text="위도(latitude)")
-    lng = models.FloatField(help_text="경도(longitude)")
-    distance = models.FloatField(help_text="출발/여행지로부터 거리")
