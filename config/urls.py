@@ -10,7 +10,6 @@ urlpatterns = [
     path("base/", views.base, name='base'), # base
     path('accounts/', include('accounts.urls')), # accounts
     path('accounts/', include('allauth.urls')), # allauth URLs
-    path('feeds/', include('feeds.urls')), # feeds
 ]
 
 if settings.DEBUG:

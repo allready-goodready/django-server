@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.kakao', # kakao
     'allauth.socialaccount.providers.google', # google
-    'feeds',
     # bootstrap
     'django_bootstrap5',
 ]
