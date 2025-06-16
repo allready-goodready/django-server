@@ -1,6 +1,6 @@
 # Django 기본
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -27,6 +27,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 
 User = get_user_model()
 
@@ -126,53 +127,87 @@ class VerifyEmailView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class SignUpView(APIView):
-    permission_classes = [AllowAny]
+class SignUpView(View):
+    def get(self, request):
+        form = SignUpForm()
+        return render(request, 'accounts/signup.html', {'form': form})
     
     def post(self, request):
-        form = SignUpForm(request.data)
-        if form.is_valid():
-            if User.objects.filter(username=form.cleaned_data['username']).exists():
-                return Response({
-                    'status': 'error',
-                    'message': '이미 사용 중인 아이디입니다.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            try:
-                verification = EmailVerification.objects.get(
-                    email=form.cleaned_data['email'],
-                    is_verified=True
-                )
-            except EmailVerification.DoesNotExist:
-                return Response({
-                    'status': 'error',
-                    'message': '이메일 인증이 필요합니다.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            try:
-                user = form.save()
-                login(request, user)
-                verification.delete()
+        print("회원가입 시도:", request.POST)  # 디버깅용
+        form = SignUpForm(request.POST)
+        try:
+            if form.is_valid():
+                print("폼 유효성 검사 통과")  # 디버깅용
+                if User.objects.filter(username=form.cleaned_data['username']).exists():
+                    return JsonResponse({
+                        'status': 'error',
+                        'errors': {'username': ['이미 사용 중인 아이디입니다.']}
+                    })
                 
-                request.session['signup_completed'] = True
+                email = form.cleaned_data['email']
+                print(f"이메일 확인: {email}")  # 디버깅용
                 
-                return Response({
-                    'status': 'success',
-                    'message': '회원가입이 완료되었습니다.',
-                    'redirect_url': '/base/'
+                try:
+                    verification = EmailVerification.objects.get(
+                        email=email,
+                        is_verified=True
+                    )
+                    print(f"이메일 인증 상태: {verification.is_verified}")  # 디버깅용
+                except EmailVerification.DoesNotExist:
+                    print("이메일 인증 정보 없음")  # 디버깅용
+                    return JsonResponse({
+                        'status': 'error',
+                        'errors': {'email': ['이메일 인증이 필요합니다.']}
+                    })
+                
+                try:
+                    print("사용자 생성 시도")  # 디버깅용
+                    user = form.save()
+                    print(f"사용자 생성 성공: {user.username}")  # 디버깅용
+                    
+                    # 사용자 인증 및 로그인
+                    user.backend = 'django.contrib.auth.backends.ModelBackend'
+                    login(request, user)
+                    verification.delete()
+                    
+                    request.session['signup_completed'] = True
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': '회원가입이 완료되었습니다.',
+                        'redirect_url': reverse('base')
+                    })
+                except Exception as e:
+                    print(f"회원가입 상세 오류: {str(e)}")  # 디버깅용
+                    import traceback
+                    print(traceback.format_exc())  # 스택 트레이스 출력
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'회원가입 중 오류가 발생했습니다: {str(e)}'
+                    })
+            else:
+                print("폼 유효성 검사 실패:", form.errors)  # 디버깅용
+                errors = {}
+                # non_field_errors 처리 (clean() 메서드의 오류)
+                if form.non_field_errors():
+                    errors['__all__'] = [str(error) for error in form.non_field_errors()]
+                # 필드별 오류 처리
+                for field, field_errors in form.errors.items():
+                    if field == '__all__':
+                        continue  # non_field_errors는 이미 처리했으므로 건너뜀
+                    errors[field] = [str(error) for error in field_errors]
+                
+                return JsonResponse({
+                    'status': 'error',
+                    'errors': errors
                 })
-            except Exception as e:
-                return Response({
-                    'status': 'error',
-                    'message': '회원가입 중 오류가 발생했습니다.',
-                    'errors': str(e)
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return Response({
+        except Exception as e:
+            print(f"예상치 못한 오류: {str(e)}")  # 디버깅용
+            import traceback
+            print(traceback.format_exc())  # 스택 트레이스 출력
+            return JsonResponse({
                 'status': 'error',
-                'message': '입력하신 정보를 확인해주세요.',
-                'errors': form.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': f'회원가입 중 오류가 발생했습니다: {str(e)}'
+            })
 
 class SignInView(APIView):
     permission_classes = [AllowAny]
