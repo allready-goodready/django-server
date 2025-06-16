@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "django_bootstrap5",
     "planner",
+    "flight",
 ]
 
 REST_FRAMEWORK = {
