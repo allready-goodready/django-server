@@ -22,6 +22,8 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 GOOGLE_PLACES_API_KEY = env("GOOGLE_PLACES_API_KEY")
+AMADEUS_CLIENT_ID = env("AMADEUS_CLIENT_ID")
+AMADEUS_CLIENT_SECRET = env("AMADEUS_CLIENT_SECRET")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -48,6 +50,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "django_bootstrap5",
     "planner",
+    "flight",
 ]
 
 REST_FRAMEWORK = {
