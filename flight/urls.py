@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AirportNearOriginAPIView, AirportNearDestAPIView
+from .views import FlightSearchAPIView, AirportNearOriginAPIView, AirportNearDestAPIView
 
 app_name = "flight"
 
@@ -14,4 +14,5 @@ urlpatterns = [
         AirportNearDestAPIView.as_view(),
         name="api_flight_airport_near_dest",
     ),
+    path("search/", FlightSearchAPIView.as_view(), name="api_flight_search"),
 ]
