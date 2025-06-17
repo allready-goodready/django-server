@@ -3,8 +3,8 @@
 const uploadModal = document.getElementById("modal_upload_feed");
 const openUploadBtn = document.getElementById("open_feed_create_modal");
 const imageInput = document.getElementById("image_input");
-const imageUploadBtn = document.getElementById("next_feed_step");
-const nextBtn = document.getElementById("select_img");
+const imageUploadBtn = document.getElementById("select_img");
+const nextBtn = document.getElementById("next_feed_step");
 const uploadText = document.getElementById("upload_text");
 const previewWrapper = document.getElementById("preview_wrapper");
 
@@ -26,6 +26,9 @@ openUploadBtn?.addEventListener("click", () => {
   document.getElementById("modal_crop_feed").style.display = "none";
   document.getElementById("modal_create_feed").style.display = "none";
   
+  const detailModal = document.getElementById("modal_detail_feed");
+  if (detailModal) detailModal.style.display = "none";
+
   // 초기화
   selectedImages = [];
   imageList = [];
@@ -61,7 +64,9 @@ openUploadBtn?.addEventListener("click", () => {
 
 // "사진 선택" 버튼 → input 열기
 imageUploadBtn?.addEventListener("click", () => {
+  console.log("imageInput:", imageInput);
   imageInput.click();
+  console.log("클릭됨");
 });
 
 // 파일 선택 시

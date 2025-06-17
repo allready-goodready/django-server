@@ -98,7 +98,6 @@
 .crop_modal_content:hover .arrow,
 /* crop 모달 */
 #input_image:hover .arrow
-
 /* create 모달 */
     {
     opacity: 0.5;
@@ -238,7 +237,7 @@ s #crop_target_image {
     right: 10px;
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 10;
+    z-index: 60;
 }
 
 .ratio_buttons .active {

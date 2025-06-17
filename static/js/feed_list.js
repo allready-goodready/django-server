@@ -1,4 +1,5 @@
 // static/js/feed_list.js
+// 나중에 프로필 이미지 부분 백엔드에서 받아오기 
 
 function getCurrentPage() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -49,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const col = document.createElement("div");
                 col.classList.add("col");
                 col.innerHTML = `
-                    <div class="feed-item position-relative">
+                    <div class="feed-item position-relative" data-id="${feed.id}">
                         <div class="image-box">
                             <a href="#">
                                 <img src="${feed.images[0]}" class="feed-img" alt="피드 이미지">
@@ -122,68 +123,16 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("페이지네이션 에러:", error);
         });
         
-    // // 모달 열기 함수
-    // function openFeedDetailModal(feedId) {
-    //     const modal = document.getElementById("modal_detail_feed");
-
-    //     fetch(`/api/feed/${feedId}/`)
-    //         .then(res => res.json())
-    //         .then(data => {
-    //             document.getElementById("detail_image").innerHTML = `
-    //                 <img src="${data.images[0]}" class="feed-img" style="width: 100%;">
-    //             `;
-    //             document.getElementById("input_user_id").textContent = data.user.username;
-    //             document.getElementById("detail_caption").textContent = data.caption;
-    //             document.getElementById("detail_place").innerHTML = `여행지: <span class="fw-bold">${data.place}</span>`;
-                
-    //             modal.style.display = "flex";
-    //             document.body.style.overflow = "hidden";
-    //         })
-    //         .catch(err => {
-    //             console.error("피드 상세 로드 실패:", err);
-    //         });
-    // }
-
-    // // 모달 닫기 버튼
-    // document.getElementById("close_create_modal_x")?.addEventListener("click", () => {
-    //     document.getElementById("modal_detail_feed").style.display = "none";
-    //     document.body.style.overflowY = "visible";
-    // });
-
-    // // 동적으로 생성된 카드에 이벤트 위임
-    // document.addEventListener("click", function (e) {
-    //     if (e.target.closest(".open-detail-modal")) {
-    //         e.preventDefault();
-    //         const id = e.target.closest(".open-detail-modal").dataset.id;
-    //         openFeedDetailModal(id);
-    //     }
-    // });
-
+    
     // 예시: 피드 카드 클릭 시 detail 모달 띄우기
     document.addEventListener("click", function (e) {
-    const target = e.target.closest(".feed-item");  // 카드 전체
+        const target = e.target.closest(".feed-item");  // 카드 전체
+        
 
-    if (target) {
-        // 모달 열기
-        const modal = document.getElementById("modal_detail_feed");
-        if (modal) {
-        modal.style.top = window.pageYOffset + "px";
-        modal.style.display = "flex";
-        document.body.style.overflow = "hidden";  // 스크롤 잠금
-
-        // 테스트용 더미 데이터 넣기
-        document.getElementById("detail_image").innerHTML = `
-            <img src="/static/images/1.png" ">
-        `;
-        document.getElementById("input_user_id").textContent = "sample_user";
-        document.getElementById("detail_caption").textContent = "이건 테스트 캡션입니다.";
-        document.querySelector("#detail_place span").textContent = "대한민국 서울";
+        if (target) {      
+            e.preventDefault();     
+            const feedId = target.dataset.id;
+            window.openFeedDetailModal(feedId);
         }
-    }
     });
-
-    document.getElementById("close_create_modal_x")?.addEventListener("click", function () {
-        document.getElementById("modal_detail_feed").style.display = "none";
-        document.body.style.overflowY = "visible";
-    });    
 });

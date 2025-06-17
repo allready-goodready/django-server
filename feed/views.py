@@ -6,7 +6,7 @@ from feed.models import Feed
 
 from feed.models import Feed, FeedImage
 from feed.serializers import FeedSerializer
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from rest_framework.renderers import JSONRenderer
@@ -69,4 +69,14 @@ class FeedListView(ListAPIView) :
     ordering_fields = ['created_at']    # , 'like_count' 추가 예정
     ordering = ['-created_at']  # 기본 정렬 기준
     search_fields = ['caption', 'place']    # , 'user__username' 추가 예정
+    renderer_classes = [JSONRenderer]
+
+# FD-08 : 피드 상세 api
+class FeedDetailView(RetrieveAPIView) :
+    queryset = Feed.objects.all()
+    serializer_class = FeedSerializer
+    permission_classes = [IsAuthenticated]  # 인증된 사용자만 허용
+
+    lookup_field = 'id'     # 모델에서 조회 기준이 되는 필드
+    lookup_url_kwarg = 'feed_id'    # url에서 받아올 변수명과 맞춰줌
     renderer_classes = [JSONRenderer]
