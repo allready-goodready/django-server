@@ -15,4 +15,7 @@ urlpatterns = [
         name="api_flight_airport_near_dest",
     ),
     path("search/", FlightSearchAPIView.as_view(), name="api_flight_search"),
+    path(
+        "candidates/", FlightCandidatesAPIView.as_view(), name="api_flight_candidates"
+    ),
 ]
