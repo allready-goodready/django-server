@@ -137,3 +137,13 @@ class FeedBookmarkAPIView(APIView) :
         return Response({
             "is_bookmarked": bookmarked,
         }, status=status.HTTP_200_OK)
+
+
+# FD-09 : 내가 작성한 피드 목록 api
+class MyFeedListAPIView(ListAPIView) : 
+    serializer_class = FeedSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Feed.objects.filter(user=self.request.user).order_by('-created_at')
+    
