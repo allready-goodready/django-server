@@ -21,6 +21,7 @@
     background: white;
     border-radius: 10px;
     max-width: 90%;
+    user-select: none;
 }
 
 .upload_modal_window {
