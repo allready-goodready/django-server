@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         
     
-    // 예시: 피드 카드 클릭 시 detail 모달 띄우기
+    // 피드 카드 클릭 시 detail 모달 띄우기
     document.addEventListener("click", function (e) {
         const target = e.target.closest(".feed-item");  // 카드 전체
         

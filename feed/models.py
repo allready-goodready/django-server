@@ -25,3 +25,12 @@ class FeedImage(models.Model) :
     def __str__(self) : 
         return f"피드({self.feed.id}) 의 이미지"
     
+
+class Like(models.Model) : 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta : 
+        unique_together = ('user', 'feed')  # 같은 유저가 같은 피드에 좋아요를 여러 번 누를 수 없음
+        ordering = ['-created_at']

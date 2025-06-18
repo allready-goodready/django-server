@@ -12,12 +12,14 @@ class FeedSerializer(serializers.ModelSerializer) :
     caption = serializers.CharField(required=True, allow_blank=False)   # 캡션
     images = serializers.SerializerMethodField() # 피드 이미지들
 
+    like_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
 
-    # 좋아요, 북마크, 내 글 관련은 이후 추가할 예정
-
+    # 북마크, 내 글 관련은 이후 추가할 예정
+    
     class Meta : 
         model = Feed
-        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'user', 'created_at'] # user 필드는 아직 추가 안 함
+        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'user', 'created_at', 'like_count', 'is_liked'] 
 
     # 빈 값 방지 / 최대 5장 이미지 / 이미지는 장 당 10MB까지
     def validate(self, data):
@@ -64,3 +66,12 @@ class FeedSerializer(serializers.ModelSerializer) :
             'username': obj.user.username,
             # 다른 필드들 필요시 추가
         }
+    
+    def get_like_count(self, obj):
+        return obj.likes.count()  
+
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(user=request.user).exists()
+        return False
