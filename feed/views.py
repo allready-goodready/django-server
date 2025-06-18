@@ -147,3 +147,11 @@ class MyFeedListAPIView(ListAPIView) :
     def get_queryset(self):
         return Feed.objects.filter(user=self.request.user).order_by('-created_at')
     
+
+# FD-10 : 내가 북마크한 피드 목록 api
+class MyBookmarkListView(ListAPIView):
+    serializer_class = FeedSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Feed.objects.filter(bookmarks__user=self.request.user).order_by('-created_at')
