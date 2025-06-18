@@ -21,7 +21,7 @@ class FeedSerializer(serializers.ModelSerializer) :
     
     class Meta : 
         model = Feed
-        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'user', 'created_at', 'like_count', 'is_liked', 'is_bookmarked',] 
+        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'user', 'created_at', 'like_count', 'is_liked', 'is_bookmarked', 'is_mine'] 
 
     # 빈 값 방지 / 최대 5장 이미지 / 이미지는 장 당 10MB까지
     def validate(self, data):
