@@ -61,26 +61,35 @@ def prioritize_offers(offers):
     def parse_time(dt):
         return datetime.fromisoformat(dt)
 
-    def is_return_round(o):
+    def is_round_trip(o):
         return len(o.get("itineraries", [])) == 2
 
     def key_fn(o):
-        out_dep = parse_time(o["itineraries"][0]["segments"][0]["departure"]["at"])
-        ret_arr = parse_time(o["itineraries"][1]["segments"][-1]["arrival"]["at"])
+        out_dt = parse_time(o["itineraries"][0]["segments"][0]["departure"]["at"])
+        ret_dt = parse_time(o["itineraries"][1]["segments"][-1]["arrival"]["at"])
         price = float(o["price"]["total"])
-        # PT#H#M 형식에서 시간과 분을 추출하여 총 분 산정
-        duration = sum(
-            int(seg["duration"].replace("PT", "").replace("H", "").replace("M", ""))
-            for itin in o["itineraries"]
-            for seg in itin["segments"]
-        )
+        # 비행 시간 총 분 계산 (PT#H#M 형태에서 시간·분 분리)
+        total_minutes = 0
+        for itin in o["itineraries"]:
+            for seg in itin["segments"]:
+                dur = seg.get("duration", "")
+                dur = dur.replace("PT", "")
+                hours, minutes = 0, 0
+                if "H" in dur:
+                    h_part, m_part = dur.split("H")
+                    hours = int(h_part)
+                    if m_part.endswith("M"):
+                        minutes = int(m_part[:-1])
+                elif dur.endswith("M"):
+                    minutes = int(dur[:-1])
+                total_minutes += hours * 60 + minutes
         stops = sum(len(itin["segments"]) - 1 for itin in o["itineraries"])
         return (
-            0 if is_return_round(o) else 1,
-            out_dep,
-            -ret_arr.timestamp(),
+            0 if is_round_trip(o) else 1,
+            out_dt,
+            -ret_dt.timestamp(),
             price,
-            duration,
+            total_minutes,
             stops,
         )
 
