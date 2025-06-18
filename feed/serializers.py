@@ -17,7 +17,7 @@ class FeedSerializer(serializers.ModelSerializer) :
 
     is_bookmarked = serializers.SerializerMethodField()
 
-    # 내 글 관련은 이후 추가할 예정
+    is_mine = serializers.SerializerMethodField()
     
     class Meta : 
         model = Feed
@@ -83,3 +83,6 @@ class FeedSerializer(serializers.ModelSerializer) :
         if request and request.user.is_authenticated:
             return obj.bookmarks.filter(user=request.user).exists()
         return False
+    
+    def get_is_mine(self, obj):
+        return obj.user == self.context['request'].user
