@@ -89,3 +89,6 @@ docker-compose.override.yml
 # ── Optional ───────────────────────────────────────────────────────────────────
 # celery
 celerybeat-schedule
+
+# 피드에 첨부한 사진 폴더
+feeds/

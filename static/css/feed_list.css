@@ -1,0 +1,70 @@
+/* static/css/feed_list.css */
+
+.feed-container {
+  max-width: 1000px;
+  user-select: none;
+}
+
+.feed-item .image-box {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+}
+
+.feed-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-box:hover .feed-overlay {
+  opacity: 1;
+}
+
+.username { 
+  color : white;
+  font-weight: bold;
+}
+
+.profile-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bookmark-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.location {
+  font-size: 13px;
+  color: navy;
+  font-weight: 500;
+}
+
+.caption {
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3.8em;  /* 대충 2~3줄 제한 */
+  color : white;
+}
+
+.image-box a {
+  display: block;
+  height: 100%;
+}
+
+.feed-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
