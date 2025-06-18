@@ -63,6 +63,21 @@ class FlightSearchAPIView(APIView):
         return Response({"offers": offers, "default_offer": default_offer})
 
 
+class FlightCandidatesAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        plan_id = request.query_params.get("plan_id")
+        plan = get_object_or_404(TravelPlan, id=plan_id, user=request.user)
+        fs = get_object_or_404(FlightSelection, plan=plan)
+        return Response(
+            {
+                "offers": fs.offers_data or [],
+                "selected_offer": fs.selected_offer_snapshot,
+            }
+        )
+
+
 class AirportNearOriginAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
