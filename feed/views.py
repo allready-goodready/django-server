@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.core.paginator import Paginator
-from feed.models import Feed
+from feed.models import Feed, Like
 
 
 from feed.models import Feed, FeedImage
@@ -13,7 +13,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.views import APIView
+from rest_framework import status
 # Create your views here.
 
 # FD-01 : 피드 등록 화면
@@ -80,3 +81,34 @@ class FeedDetailView(RetrieveAPIView) :
     lookup_field = 'id'     # 모델에서 조회 기준이 되는 필드
     lookup_url_kwarg = 'feed_id'    # url에서 받아올 변수명과 맞춰줌
     renderer_classes = [JSONRenderer]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+
+# FD-06 : 피드 좋아요 api
+class FeedLikeAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, feed_id) : 
+        try:
+            feed = Feed.objects.get(pk=feed_id)
+        except Feed.DoesNotExist:
+            return Response({"error": "피드가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+        
+        user = request.user
+        like_obj = Like.objects.filter(user=user, feed=feed).first()
+
+        if like_obj:
+            like_obj.delete()
+            liked = False
+        else:
+            Like.objects.create(user=user, feed=feed)
+            liked = True
+
+        return Response({
+            "is_liked": liked,
+            "like_count": feed.likes.count()
+        }, status=status.HTTP_200_OK)

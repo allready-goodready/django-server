@@ -12,7 +12,10 @@
     backdrop-filter: blur(1.5px);
     -webkit-backdrop-filter: blur(1.5px);
     z-index: 9999;
+    user-select: none;
 }
+
+
 
 /* 외곽 X 버튼 */
 #close_detail_modal_x.modal_close_outer {
@@ -156,12 +159,19 @@
 }
 
 /* 캡션 영역 */
+
+#modal_detail_feed .detail_caption_box,
+#modal_detail_feed #detail_caption {
+    user-select: text !important;   /* 캡션은 드래그 가능*/
+}
+
 .detail_caption_box {
     height: 252px;
     overflow-y: auto;
     padding: 6px 12px;
     margin: 0;
     font-size: 14px;
+    cursor: text;
 }
 
 /* 장소 출력 */
@@ -173,4 +183,11 @@
 /* 좋아요/북마크 아이콘 */
 .detail_content_area .d-flex.justify-content-end {
     padding: 12px;
+}
+
+/* 좋아요 수 */
+#like-count {
+  font-size: 15px;
+  color: #333;
+  margin-left: 4px;
 }
