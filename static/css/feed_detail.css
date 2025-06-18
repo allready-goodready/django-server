@@ -81,6 +81,42 @@
     object-fit: cover;
 }
 
+/* 피드 상세 모달 화살표 */
+.detail-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 50px;
+    font-size: 36px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 10;
+}
+
+/* 방향 설정 */
+.detail-arrow.left {
+    left: 10px;
+}
+
+.detail-arrow.right {
+    right: 10px;
+}
+
+/* 이미지 위에 마우스 올렸을 때만 보이기 */
+.slider-container:hover .detail-arrow {
+    opacity: 0.6;
+}
+
+
 /* 오른쪽 텍스트 영역 */
 .detail_content_area {
     flex: 1;
