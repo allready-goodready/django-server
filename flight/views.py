@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from planner.models import TravelPlan
 from .services import get_nearest_airport, search_flight_offers, prioritize_offers
+from .models import FlightSelection
 
 
 class FlightSearchAPIView(APIView):
@@ -16,22 +17,16 @@ class FlightSearchAPIView(APIView):
         latest_arr = request.query_params.get("latest_arr")
 
         plan = get_object_or_404(TravelPlan, id=plan_id, user=request.user)
-        fs = get_nearest_airport(
-            plan.locations.filter(type="origin").first().latitude,
-            plan.locations.filter(type="origin").first().longitude,
-        )
-        origin_iata = fs["iata"] if fs else None
-        ds = get_nearest_airport(
-            plan.locations.filter(type="destination").first().latitude,
-            plan.locations.filter(type="destination").first().longitude,
-        )
-        dest_iata = ds["iata"] if ds else None
-        if not origin_iata or not dest_iata:
+        origin_loc = plan.locations.filter(type="origin").first()
+        dest_loc = plan.locations.filter(type="destination").first()
+        origin_airport = get_nearest_airport(origin_loc.latitude, origin_loc.longitude)
+        dest_airport = get_nearest_airport(dest_loc.latitude, dest_loc.longitude)
+        if not origin_airport or not dest_airport:
             return Response({"error": "Airport info missing."}, status=400)
 
         offers = search_flight_offers(
-            origin_iata,
-            dest_iata,
+            origin_airport["iata"],
+            dest_airport["iata"],
             plan.start_date.isoformat(),
             plan.end_date.isoformat(),
             adults=int(adults),
@@ -53,12 +48,19 @@ class FlightSearchAPIView(APIView):
             ]
 
         # 기본값 선정
-        default = None
-        if offers:
-            prioritized = prioritize_offers(offers)
-            default = prioritized[0]
+        default_offer = prioritize_offers(offers)[0] if offers else None
 
-        return Response({"offers": offers, "default_offer": default})
+        # 캐싱 로직
+        FlightSelection.objects.update_or_create(
+            plan=plan,
+            defaults={
+                "departure_iata": origin_airport["iata"],
+                "arrival_iata": dest_airport["iata"],
+                "offers_data": offers,
+            },
+        )
+
+        return Response({"offers": offers, "default_offer": default_offer})
 
 
 class AirportNearOriginAPIView(APIView):
