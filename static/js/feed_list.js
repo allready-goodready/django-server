@@ -1,33 +1,31 @@
 // static/js/feed_list.js
 // 나중에 프로필 이미지 부분 백엔드에서 받아오기 
 
+// 현재 URL에서 'page' 쿼리 파라미터를 가져오는 함수
 function getCurrentPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const page = parseInt(urlParams.get("page")) || 1;
-    
     return isNaN(page) ? 1 : page;
 }
 
+// 쿼리 파라미터를 수정해서 새로운 URL 쿼리 문자열을 반환하는 함수
 function updateQueryParam(param, value, urlParams) {
     const updated = new URLSearchParams(urlParams);
     updated.set(param, value);
     return '?' + updated.toString();
 }
 
+
 document.addEventListener("DOMContentLoaded", function () {
     const paginationContainer = document.getElementById("pagination");
-    const feedContainer = document.querySelector(".row");  // 카드들이 들어있는 div
+    const feedContainer = document.querySelector(".row");
 
-    // 현재 페이지 번호 가져오기
     const currentPage = getCurrentPage();
-    
     const urlParams = new URLSearchParams(window.location.search);
     const pageSize = parseInt(urlParams.get("page_size")) || 12;
+    const apiUrl = `/feed/api/feeds/?${urlParams.toString()}`;
 
-    const queryString = urlParams.toString();  // 쿼리 전체 추출
-    const apiUrl = `/feed/api/feeds/?${queryString}`;
-
-    // 현재 페이지 번호 기반 API 요청
+    // 피드 목록 API 요청
     fetch(apiUrl)
         .then(response => {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -37,8 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const totalFeeds = data.count;
             const perPage = isNaN(pageSize) ? 12 : pageSize;
             const totalPages = Math.ceil(totalFeeds / perPage);
-
-            // 피드 목록 렌더링
             feedContainer.innerHTML = "";
 
             if (!data.results || !Array.isArray(data.results)) {
@@ -46,9 +42,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            // 받아온 피드 배열을 순회하면서 렌더링
             data.results.forEach(feed => {
                 const col = document.createElement("div");
                 col.classList.add("col");
+
+                // 북마크 상태에 따른 아이콘 스타일 설정
+                const isBookmarked = feed.is_bookmarked;
+                const bookmarkIconClass = isBookmarked ? "material-icons" : "material-icons-outlined";
+                const bookmarkIconText = isBookmarked ? "bookmark" : "bookmark_border";
+                const bookmarkColor = isBookmarked ? "#4169E1" : "black";
+
+                // 피드 카드 HTML 구성
                 col.innerHTML = `
                     <div class="feed-item position-relative" data-id="${feed.id}">
                         <div class="image-box">
@@ -60,7 +65,10 @@ document.addEventListener("DOMContentLoaded", function () {
                                             <img src="/static/images/user.jpg" class="profile-img me-2" alt="프로필">
                                             <div class="username"> ${feed.user.username} </div>
                                         </div>
-                                        <img src="/static/images/bookmark.png" class="bookmark-icon" alt="북마크">
+                                        <span class="bookmark-icon ${bookmarkIconClass}" 
+                                            style="position: absolute; top: 10px; right: 10px; z-index: 10; font-size: 28px; color:${bookmarkColor}">
+                                            ${bookmarkIconText}
+                                        </span>
                                     </div>
                                     <div class="location fw-semibold mt-1">
                                         # ${feed.place}
@@ -72,11 +80,20 @@ document.addEventListener("DOMContentLoaded", function () {
                             </a>
                         </div>
                     </div>
-        `       ;
+                `;
+
                 feedContainer.appendChild(col);
+
+                // 북마크 아이콘 클릭 이벤트 (상세 모달 방지 + 토글 기능)
+                const bookmarkBtn = col.querySelector(".bookmark-icon");
+                bookmarkBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();  // 카드 클릭 이벤트 방지 (상세 모달 방지)
+                    const feedId = col.querySelector(".feed-item").dataset.id;
+                    toggleBookmark(feedId, bookmarkBtn);  // 북마크 토글 함수 호출 (bookmark.js에서 정의)
+                });
             });
 
-            // 페이지네이션 렌더링
+            // 페이지네이션
             const pageGroupSize = 5;
             const currentGroup = Math.floor((currentPage - 1) / pageGroupSize);
             const startPage = currentGroup * pageGroupSize + 1;
@@ -122,15 +139,12 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => {
             console.error("페이지네이션 에러:", error);
         });
-        
-    
-    // 피드 카드 클릭 시 detail 모달 띄우기
-    document.addEventListener("click", function (e) {
-        const target = e.target.closest(".feed-item");  // 카드 전체
-        
 
-        if (target) {      
-            e.preventDefault();     
+    // 카드 클릭 시 상세 모달 열기
+    document.addEventListener("click", function (e) {
+        const target = e.target.closest(".feed-item");
+        if (target && !e.target.classList.contains("bookmark-icon")) {
+            e.preventDefault();
             const feedId = target.dataset.id;
             window.openFeedDetailModal(feedId);
         }

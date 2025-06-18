@@ -15,11 +15,13 @@ class FeedSerializer(serializers.ModelSerializer) :
     like_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
 
-    # 북마크, 내 글 관련은 이후 추가할 예정
+    is_bookmarked = serializers.SerializerMethodField()
+
+    # 내 글 관련은 이후 추가할 예정
     
     class Meta : 
         model = Feed
-        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'user', 'created_at', 'like_count', 'is_liked'] 
+        fields = ['id', 'place', 'images', 'caption', 'lat', 'lon', 'user', 'created_at', 'like_count', 'is_liked', 'is_bookmarked',] 
 
     # 빈 값 방지 / 최대 5장 이미지 / 이미지는 장 당 10MB까지
     def validate(self, data):
@@ -74,4 +76,10 @@ class FeedSerializer(serializers.ModelSerializer) :
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return obj.likes.filter(user=request.user).exists()
+        return False
+
+    def get_is_bookmarked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.bookmarks.filter(user=request.user).exists()
         return False

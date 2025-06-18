@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.core.paginator import Paginator
-from feed.models import Feed, Like
+from feed.models import Bookmark, Feed, Like
 
 
 from feed.models import Feed, FeedImage
@@ -111,4 +111,29 @@ class FeedLikeAPIView(APIView):
         return Response({
             "is_liked": liked,
             "like_count": feed.likes.count()
+        }, status=status.HTTP_200_OK)
+    
+
+# FD-07 : 피드 북마크 api
+class FeedBookmarkAPIView(APIView) : 
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, feed_id) : 
+        try:
+            feed = Feed.objects.get(pk=feed_id)
+        except Feed.DoesNotExist:
+            return Response({"error": "피드가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+        
+        user = request.user
+        bookmark_obj = Bookmark.objects.filter(user=user, feed=feed).first()
+
+        if bookmark_obj:
+            bookmark_obj.delete()
+            bookmarked = False
+        else:
+            Bookmark.objects.create(user=user, feed=feed)
+            bookmarked = True
+
+        return Response({
+            "is_bookmarked": bookmarked,
         }, status=status.HTTP_200_OK)

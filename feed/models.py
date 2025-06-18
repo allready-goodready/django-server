@@ -34,3 +34,13 @@ class Like(models.Model) :
     class Meta : 
         unique_together = ('user', 'feed')  # 같은 유저가 같은 피드에 좋아요를 여러 번 누를 수 없음
         ordering = ['-created_at']
+
+
+class Bookmark(models.Model) :
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name='bookmarks')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta : 
+        unique_together = ('user', 'feed')  # 같은 유저가 같은 피드에 북마크를 여러 번 누를 수 없음
+        ordering = ['-created_at']

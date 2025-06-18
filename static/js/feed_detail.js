@@ -14,7 +14,7 @@ function getCSRFToken() {
     return "";
 }
 
-// 좋아요 버튼 초기화 + 클릭 이벤트 등록
+// 좋아요 버튼 초기화 및 클릭 이벤트 등록
 function initLikeButton(feedId, isLiked, likeCount) {
     const oldBtn = document.getElementById("like-button");
     if (!oldBtn || !feedId) return;
@@ -88,6 +88,45 @@ function initLikeButton(feedId, isLiked, likeCount) {
     });
 }
 
+
+// 피드 상세 이미지 슬라이더 렌더 함수
+window.renderSliderImage = function () {
+    const container = document.getElementById("detail_image");
+    const totalImages = window.feedImages.length;
+    const currentImage = window.feedImages[window.currentImageIndex];
+
+    let prevBtn = '';
+    let nextBtn = '';
+
+    if (totalImages > 1 && window.currentImageIndex > 0)
+        prevBtn = `<button id="prevBtn" class="detail-arrow left">&#10094;</button>`;
+    if (totalImages > 1 && window.currentImageIndex < totalImages - 1)
+        nextBtn = `<button id="nextBtn" class="detail-arrow right">&#10095;</button>`;
+
+    container.innerHTML = `
+        <div class="slider-container" style="position: relative;">
+            <img src="${currentImage}" class="feed-img" style="width: 100%;">
+            ${prevBtn}
+            ${nextBtn}
+        </div>
+    `;
+
+    // 화살표 이벤트 등록
+    document.getElementById("prevBtn")?.addEventListener("click", () => {
+        if (window.currentImageIndex > 0) {
+            window.currentImageIndex--;
+            renderSliderImage();
+        }
+    });
+
+    document.getElementById("nextBtn")?.addEventListener("click", () => {
+        if (window.currentImageIndex < totalImages - 1) {
+            window.currentImageIndex++;
+            renderSliderImage();
+        }
+    });
+}
+
 // 피드 상세 모달 열기
 window.openFeedDetailModal = function (feedId) {
     const modal = document.getElementById("modal_detail_feed");
@@ -108,57 +147,43 @@ window.openFeedDetailModal = function (feedId) {
     fetch(`/feed/api/${feedId}/`)
         .then(res => res.json())
         .then(data => {
-            // 작성자, 내용, 장소
+            // 기본 정보 렌더링
             document.getElementById("detail_profile_image").src = data.user.profile_image || "/static/images/user.jpg";
             document.getElementById("detail_user_id").textContent = data.user.username;
             document.getElementById("detail_caption").textContent = data.caption;
             document.querySelector("#detail_place span").textContent = data.place;
 
-            // 좋아요 버튼/수 초기화
+            // 좋아요 초기화
             initLikeButton(feedId, data.is_liked, data.like_count);
+
+            // 북마크 버튼 클릭 이벤트 등록
+            const bookmarkBtn = document.getElementById("bookmark-button");
+            if (bookmarkBtn) {
+                // 현재 상태를 서버에서 받아온 값에 따라 설정
+                if (data.is_bookmarked) {
+                    bookmarkBtn.textContent = "bookmark";
+                    bookmarkBtn.classList.remove("material-icons-outlined");
+                    bookmarkBtn.classList.add("material-icons");
+                    bookmarkBtn.style.color = "#4169E1";
+                } 
+                else {
+                    bookmarkBtn.textContent = "bookmark_border";
+                    bookmarkBtn.classList.remove("material-icons");
+                    bookmarkBtn.classList.add("material-icons-outlined");
+                    bookmarkBtn.style.color = "black";
+                }
+
+                // 클릭 시 토글
+                bookmarkBtn.addEventListener("click", function () {
+                toggleBookmark(feedId, bookmarkBtn);
+                });
+            }
 
             // 이미지 슬라이더 설정
             window.feedImages = data.images;
             window.currentImageIndex = 0;
 
-            function renderSliderImage() {
-                const container = document.getElementById("detail_image");
-                const totalImages = window.feedImages.length;
-                const currentImage = window.feedImages[window.currentImageIndex];
-
-                let prevBtn = '';
-                let nextBtn = '';
-
-                if (totalImages > 1 && window.currentImageIndex > 0)
-                    prevBtn = `<button id="prevBtn" class="detail-arrow left">&#10094;</button>`;
-                if (totalImages > 1 && window.currentImageIndex < totalImages - 1)
-                    nextBtn = `<button id="nextBtn" class="detail-arrow right">&#10095;</button>`;
-
-                container.innerHTML = `
-                    <div class="slider-container" style="position: relative;">
-                        <img src="${currentImage}" class="feed-img" style="width: 100%;">
-                        ${prevBtn}
-                        ${nextBtn}
-                    </div>
-                `;
-
-                // 화살표 이벤트 등록
-                document.getElementById("prevBtn")?.addEventListener("click", () => {
-                    if (window.currentImageIndex > 0) {
-                        window.currentImageIndex--;
-                        renderSliderImage();
-                    }
-                });
-
-                document.getElementById("nextBtn")?.addEventListener("click", () => {
-                    if (window.currentImageIndex < totalImages - 1) {
-                        window.currentImageIndex++;
-                        renderSliderImage();
-                    }
-                });
-            }
-
-            renderSliderImage();
+            window.renderSliderImage();
         })
         .catch(err => {
             console.error("피드 상세 로드 실패:", err);
