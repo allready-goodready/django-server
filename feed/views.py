@@ -15,6 +15,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework import status
+from django.db.models import Count
+
 # Create your views here.
 
 # FD-01 : 피드 등록 화면
@@ -61,15 +63,15 @@ class FeedPagination(PageNumberPagination) :
 
 # FD-04 : 피드 목록 api
 class FeedListView(ListAPIView) : 
-    queryset = Feed.objects.all().order_by('-created_at')   # 최신순
+    queryset = Feed.objects.annotate(like_count=Count("likes")).order_by('-created_at')   # 최신순
     serializer_class = FeedSerializer
     pagination_class = FeedPagination
     
     # 정렬, 검색
     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
-    ordering_fields = ['created_at']    # , 'like_count' 추가 예정
+    ordering_fields = ['created_at', 'like_count']
     ordering = ['-created_at']  # 기본 정렬 기준
-    search_fields = ['caption', 'place']    # , 'user__username' 추가 예정
+    search_fields = ['caption', 'place', 'user__username']
     renderer_classes = [JSONRenderer]
 
 # FD-08 : 피드 상세 api
