@@ -15,6 +15,8 @@ function updateQueryParam(param, value, urlParams) {
     return '?' + updated.toString();
 }
 
+// 북마크가 변경된 피드 ID를 기록할 Set
+const updatedBookmarks = new Set();
 
 document.addEventListener("DOMContentLoaded", function () {
     const paginationContainer = document.getElementById("pagination");
@@ -42,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // 받아온 피드 배열을 순회하면서 렌더링
+            // 각 피드를 카드 형태로 DOM에 추가
             data.results.forEach(feed => {
                 const col = document.createElement("div");
                 col.classList.add("col");
@@ -82,11 +84,40 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                 `;
 
+                // 북마크 상태 갱신 (hover 시 서버에서 최신 정보 확인)
+                col.addEventListener("mouseenter", async () => {
+                    const feedId = col.querySelector(".feed-item").dataset.id;
+                    const bookmarkBtn = col.querySelector(".bookmark-icon");
+
+                    // 서버에서 최신 북마크 상태 조회
+                    try {
+                        const res = await fetch(`/feed/api/${feedId}/`);
+                        const data = await res.json();
+
+                        if (data.is_bookmarked) {
+                            bookmarkBtn.textContent = "bookmark";
+                            bookmarkBtn.classList.remove("material-icons-outlined");
+                            bookmarkBtn.classList.add("material-icons");
+                            bookmarkBtn.style.color = "#4169E1";
+                        }
+                        else {
+                            bookmarkBtn.textContent = "bookmark_border";
+                            bookmarkBtn.classList.remove("material-icons");
+                            bookmarkBtn.classList.add("material-icons-outlined");
+                            bookmarkBtn.style.color = "black";
+                        }
+                    }
+                    catch (err) {
+                        console.error("북마크 상태 갱신 실패:", err);
+                    }
+                });
+
                 feedContainer.appendChild(col);
 
                 // 북마크 아이콘 클릭 이벤트 (상세 모달 방지 + 토글 기능)
                 const bookmarkBtn = col.querySelector(".bookmark-icon");
                 bookmarkBtn.addEventListener("click", (e) => {
+                    e.preventDefault();     // a 태그의 기본 동작 막기
                     e.stopPropagation();  // 카드 클릭 이벤트 방지 (상세 모달 방지)
                     const feedId = col.querySelector(".feed-item").dataset.id;
                     toggleBookmark(feedId, bookmarkBtn);  // 북마크 토글 함수 호출 (bookmark.js에서 정의)

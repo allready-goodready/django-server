@@ -19,8 +19,13 @@ function getCookie(name) {
   return cookieValue;
 }
 
+let isProcessing = false;
+
 // 북마크 토글 함수: 북마크 상태를 서버에 요청하고 아이콘 상태를 변경함
 function toggleBookmark(feedId, iconElement) {
+  if (isProcessing) return;  // 중복 요청 방지
+    isProcessing = true;
+
   fetch(`/feed/api/${feedId}/bookmark/`, {
     method: 'POST',
     headers: {
@@ -52,5 +57,8 @@ function toggleBookmark(feedId, iconElement) {
     })
     .catch(error => {
       console.error('북마크 처리 중 오류 발생:', error);
+    })
+    .finally(() => {
+      isProcessing = false;  // 여기서 처리 완료 후 초기화
     });
 }

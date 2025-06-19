@@ -1,18 +1,5 @@
 // static/js/feed_detail.js
 
-// CSRF 토큰 가져오기
-function getCSRFToken() {
-    const name = "csrftoken";
-    const cookies = document.cookie.split(";");
-
-    for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.startsWith(name + "=")) {
-            return decodeURIComponent(cookie.substring(name.length + 1));
-        }
-    }
-    return "";
-}
 
 // 좋아요 버튼 초기화 및 클릭 이벤트 등록
 function initLikeButton(feedId, isLiked, likeCount) {
@@ -53,7 +40,7 @@ function initLikeButton(feedId, isLiked, likeCount) {
         fetch(`/feed/api/${feedId}/like/`, {
             method: "POST",
             headers: {
-                "X-CSRFToken": getCSRFToken(),
+                "X-CSRFToken": getCookie("csrftoken"),  // bookmark.js에서 제공
                 "Content-Type": "application/json",
             },
         })
