@@ -67,10 +67,12 @@ document.addEventListener("DOMContentLoaded", function () {
                                             <img src="/static/images/user.jpg" class="profile-img me-2" alt="프로필">
                                             <div class="username"> ${feed.user.username} </div>
                                         </div>
-                                        <span class="bookmark-icon ${bookmarkIconClass}" 
+                                        <button type="button"
+                                            class="bookmark-icon icon-button ${bookmarkIconClass}"
+                                            data-author-id="${feed.user.id}"
                                             style="position: absolute; top: 10px; right: 10px; z-index: 10; font-size: 28px; color:${bookmarkColor}">
                                             ${bookmarkIconText}
-                                        </span>
+                                    </button>
                                     </div>
                                     <div class="location fw-semibold mt-1">
                                         # ${feed.place}
@@ -116,7 +118,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // 북마크 아이콘 클릭 이벤트 (상세 모달 방지 + 토글 기능)
                 const bookmarkBtn = col.querySelector(".bookmark-icon");
+                // 내 글이면 북마크 비활성화
+                if (parseInt(feed.user.id) === currentUserId) {
+                    bookmarkBtn.disabled = true;
+                }
+
                 bookmarkBtn.addEventListener("click", (e) => {
+                    if (bookmarkBtn.disabled) return; // 내 글이면 아무 동작 안 함
+                    
                     e.preventDefault();     // a 태그의 기본 동작 막기
                     e.stopPropagation();  // 카드 클릭 이벤트 방지 (상세 모달 방지)
                     const feedId = col.querySelector(".feed-item").dataset.id;

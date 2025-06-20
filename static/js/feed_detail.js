@@ -143,6 +143,13 @@ window.openFeedDetailModal = function (feedId) {
             // 좋아요 초기화
             initLikeButton(feedId, data.is_liked, data.like_count);
 
+            const authorId = data.user.id;
+            
+            if (authorId == currentUserId) {
+                document.getElementById("like-button").disabled = true;
+                document.getElementById("bookmark-button").disabled = true;
+            }
+            
             // 북마크 버튼 클릭 이벤트 등록
             const bookmarkBtn = document.getElementById("bookmark-button");
             if (bookmarkBtn) {
@@ -171,6 +178,7 @@ window.openFeedDetailModal = function (feedId) {
             window.currentImageIndex = 0;
 
             window.renderSliderImage();
+
         })
         .catch(err => {
             console.error("피드 상세 로드 실패:", err);

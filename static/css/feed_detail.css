@@ -191,3 +191,16 @@
   color: #333;
   margin-left: 4px;
 }
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+}

@@ -30,6 +30,9 @@
 
 
 {% block script %}
+  <script>
+    const currentUserId = {{ request.user.id|default:"null" }};
+  </script>
   <script src="{% static 'js/feed_list.js' %}"></script>
   <script src="{% static 'js/bookmark.js' %}"></script>
   <script src="{% static 'js/feed_detail.js' %}"></script>
