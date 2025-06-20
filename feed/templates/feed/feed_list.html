@@ -1,0 +1,40 @@
+<!-- templates/feed/feed_list.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}피드 목록{% endblock title %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/feed_list.css' %}">
+  <link rel="stylesheet" href="{% static 'css/feed_detail.css' %}">
+{% endblock css %}
+
+
+{% block content %}
+<div class="container feed-container mt-5">
+  <div class="row row-cols-1 row-cols-md-3 g-1">
+    
+  </div>
+
+  <nav aria-label="피드 페이지네이션" class="mt-5">
+    <ul id="pagination" class="pagination justify-content-center">
+      
+    </ul>
+  </nav>
+
+</div>
+
+{% include "feed/feed_detail.html" %}
+
+{% endblock content %}
+
+
+{% block script %}
+  <script>
+    const currentUserId = {{ request.user.id|default:"null" }};
+  </script>
+  <script src="{% static 'js/feed_list.js' %}"></script>
+  <script src="{% static 'js/bookmark.js' %}"></script>
+  <script src="{% static 'js/feed_detail.js' %}"></script>
+{% endblock script %}
+
