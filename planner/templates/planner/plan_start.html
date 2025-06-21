@@ -146,6 +146,10 @@
       <img src="/static/images/search.svg" alt="검색" />
     </button>
   </form>
+  <!-- 항공권 검색 템플릿 삽입 (출발지·도착지 모두 설정된 후 활성화) -->
+  <div id="flight-search-wrapper" class="disabled-by-js opacity-50">
+    {% include 'flight/flight_search.html' with plan_id=plan_id %}
+  </div>
   <!-- 에러 메시지 출력 영역 -->
   <div id="form-error" class="error-text mt-1"></div>
   <script>
@@ -233,6 +237,8 @@
           const orgSection = document.getElementById("origin-section");
           destSection.classList.remove("disabled-by-js", "opacity-50");
           orgSection.classList.remove("disabled-by-js", "opacity-50");
+          const flightWrapper = document.getElementById('flight-search-wrapper');
+          flightWrapper.classList.remove('disabled-by-js', 'opacity-50');
         })
         .catch((error) => {
           console.error("Error creating TravelPlan:", error);
