@@ -115,3 +115,39 @@ def get_airlines_info(codes):
     except ResponseError as e:
         logger.error("Error fetching airlines info: %s", e)
         return {}
+
+
+def book_flight(offer_snapshot, travelers, remarks=None, ticketing_agreement=None, contacts=None):
+    """
+    offer_snapshot: selected_offer_snapshot (dict)
+    travelers: list of traveler dicts matching API 스펙
+    remarks: {"general": [...]}
+    ticketing_agreement: {"option": "...", "delay": "..."}
+    contacts: list of contact dicts matching API 스펙
+    """
+    flight_offer = offer_snapshot.copy()
+    flight_offer.setdefault("type", "flight-offer")
+
+    data = {
+        "type": "flight-order",
+        "flightOffers": [flight_offer],
+        "travelers": travelers
+    }
+    if remarks:
+        data["remarks"] = remarks
+    if ticketing_agreement:
+        data["ticketingAgreement"] = ticketing_agreement
+    if contacts:
+        data["contacts"] = contacts
+
+    body = {"data": data}
+
+    try:
+        response = amadeus.client.post(
+            "/v1/booking/flight-orders",
+            body
+        )
+        return response.data
+    except ResponseError as error:
+        print("Amadeus booking error:", error, getattr(error, "response", None))
+        raise
