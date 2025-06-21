@@ -48,6 +48,7 @@ def search_flight_offers(
             returnDate=return_date,
             adults=adults,
             max=max,
+            currencyCode="KRW",
         )
         return response.data
     except ResponseError as e:
