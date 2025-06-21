@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from planner.models import TravelPlan
@@ -8,6 +9,7 @@ from .services import (
     search_flight_offers,
     prioritize_offers,
     get_airlines_info,
+    book_flight,
 )
 from .models import FlightSelection
 
@@ -112,6 +114,110 @@ class FlightCandidatesAPIView(APIView):
                 "selected_offer": fs.selected_offer_snapshot,
             }
         )
+
+
+class FlightSelectAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        plan_id = request.data.get("plan_id")
+        offer_id = request.data.get("offer_id")
+        offer_snapshot = request.data.get("offer_snapshot")
+
+        plan = get_object_or_404(TravelPlan, id=plan_id, user=request.user)
+        flight_sel, _ = FlightSelection.objects.update_or_create(
+            plan=plan,
+            defaults={
+                "selected_offer_id": offer_id,
+                "selected_offer_snapshot": offer_snapshot,
+            },
+        )
+        return Response({"success": True}, status=status.HTTP_200_OK)
+
+
+class FlightBookAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        plan = get_object_or_404(TravelPlan, id=request.data.get("plan_id"), user=request.user)
+        flight_sel = get_object_or_404(FlightSelection, plan=plan)
+
+        offer_snapshot = flight_sel.selected_offer_snapshot
+
+        # 실제 사용자 정보를 이용해 travelers 리스트 구성
+        travelers = [
+            {
+                "id": "1",
+                "dateOfBirth": request.user.profile.date_of_birth,
+                "name": {
+                    "firstName": request.user.first_name.upper(),
+                    "lastName": request.user.last_name.upper()
+                },
+                "gender": request.user.profile.gender.upper(),
+                "contact": {
+                    "emailAddress": request.user.email,
+                    "phones": [
+                        {
+                            "deviceType": "MOBILE",
+                            "countryCallingCode": "82",
+                            "number": request.user.profile.phone_number
+                        }
+                    ]
+                },
+                "documents": [
+                    {
+                        "documentType": "PASSPORT",
+                        "birthPlace": request.user.profile.birth_place,
+                        "issuanceLocation": request.user.profile.issuance_location,
+                        "issuanceDate": request.user.profile.issuance_date,
+                        "number": request.user.profile.passport_number,
+                        "expiryDate": request.user.profile.passport_expiry_date,
+                        "issuanceCountry": request.user.profile.nationality,
+                        "validityCountry": request.user.profile.nationality,
+                        "nationality": request.user.profile.nationality,
+                        "holder": True
+                    }
+                ]
+            }
+        ]
+
+        remarks = {
+            "general": [
+                {"subType": "GENERAL_MISCELLANEOUS", "text": "ONLINE BOOKING FROM ALLREADY"}
+            ]
+        }
+        ticketing_agreement = {"option": "DELAY_TO_CANCEL", "delay": "6D"}
+        contacts = [
+            {
+                "addresseeName": {"firstName": "ALLREADY", "lastName": "SERVICE"},
+                "companyName": "ALLREADY Inc.",
+                "purpose": "STANDARD",
+                "phones": [
+                    {"deviceType": "LANDLINE", "countryCallingCode": "82", "number": "02-1234-5678"}
+                ],
+                "emailAddress": "support@allready.com",
+                "address": {
+                    "lines": ["123 Seoul St."],
+                    "postalCode": "04524",
+                    "cityName": "Seoul",
+                    "countryCode": "KR"
+                }
+            }
+        ]
+
+        booking_data = book_flight(
+            offer_snapshot,
+            travelers,
+            remarks=remarks,
+            ticketing_agreement=ticketing_agreement,
+            contacts=contacts
+        )
+
+        flight_sel.booking_data = booking_data
+        flight_sel.save(update_fields=["booking_data"])
+
+        return Response({"booking_data": booking_data}, status=status.HTTP_200_OK)
+
 
 
 class AirportNearOriginAPIView(APIView):
