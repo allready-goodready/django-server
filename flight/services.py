@@ -94,3 +94,23 @@ def prioritize_offers(offers):
         )
 
     return sorted(offers, key=key_fn)
+
+
+def get_airlines_info(codes):
+    """
+    IATA 코드 리스트(codes)에 대해 Amadeus Reference Data API 호출.
+    반환: {'KE': {'commonName':'Korean Air', …}, …}
+    """
+    try:
+        resp = amadeus.reference_data.airlines.get(airlineCodes=",".join(codes))
+        data = resp.data or []
+        return {
+            a["iataCode"]: {
+                "commonName": a.get("commonName"),
+                "businessName": a.get("businessName"),
+            }
+            for a in data
+        }
+    except ResponseError as e:
+        logger.error("Error fetching airlines info: %s", e)
+        return {}
