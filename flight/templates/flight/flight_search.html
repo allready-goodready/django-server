@@ -1,3 +1,103 @@
+{% load django_bootstrap5 %}
+<style>
+/* 카드 컨테이너 */
+.flight-card {
+    padding: 1rem;
+    background: #fff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.25);
+    border-radius: .5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+/* 주요 정보 블록(출발/귀국 섹션) */
+.flight-card .flight-main {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.flight-card .flight-main .flight-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.flight-card .flight-main .flight-header {
+    color: #FE8115;
+    font-size: .75rem;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+.flight-card .flight-main .segment-info {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.flight-card .flight-main .segment-info img {
+    width: 40px;
+    height: 40px;
+}
+.flight-card .flight-main .segment-info .times {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+.flight-card .flight-main .segment-info .times .time {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    line-height: 1.2;
+}
+.flight-card .flight-main .segment-info .times .route {
+    font-size: .75rem;
+    font-weight: 300;
+}
+
+/* 세부 정보(직항/소요시간) */
+.flight-card .flight-main .details {
+    display: flex;
+    gap: 1rem;
+    font-size: .875rem;
+    font-weight: 300;
+}
+
+/* 가격 & 선택 버튼 블록 */
+.flight-card .flight-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .5rem;
+    width: 10rem;
+}
+.flight-card .flight-side .price {
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+.flight-card .flight-side .fare-info {
+    font-size: .75rem;
+    font-weight: 400;
+}
+.flight-card .btn-select {
+    width: 100%;
+    height: 2.5rem;
+    background: linear-gradient(135deg, #FE8115 0%, #EF233C 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: .5rem;
+}
+  /* 비행 일자 (시간 위 작은 글씨) */
+.flight-card .times .date {
+    font-size: 0.75rem;       /* 작은 글씨 */
+    color: #6c757d;           /* Bootstrap의 text-secondary 색상 */
+    font-family: 'Noto Sans KR', sans-serif;
+    margin-bottom: 0.25rem;   /* 시간과 간격 */
+}
+</style>
 <div id="flight-search-container">
     <!-- 항공권 검색 폼 -->
     <input type="hidden" id="plan-id" value="{{ plan_id }}" />
@@ -12,88 +112,115 @@
         <button id="search-btn">검색</button>
     </div>
     <!-- 검색 결과 테이블 -->
-    <div id="flight-results">
-        <table>
-            <thead>
-                <tr>
-                    <th>Offer ID</th>
-                    <th>가격</th>
-                    <th>출국 항공사</th>
-                    <th>귀국 항공사</th>
-                    <th colspan="2">출국편</th>
-                    <th colspan="2">귀국편</th>
-                </tr>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th>출발 시각</th>
-                    <th>도착 시각</th>
-                    <th>출발 시각</th>
-                    <th>도착 시각</th>
-                </tr>
-            </thead>
-            <tbody id="offers-body">
-                <!-- JS로 결과 채움 -->
-            </tbody>
-        </table>
-    </div>
+    <div id="flight-results" class="mt-4"></div>
 </div>
 <script>
+    // 시간 포맷 (HH:MM – HH:MM)
+    const formatTime = seg => {
+        const dep = seg.departure.at.split('T')[1].substr(0,5);
+        const arr = seg.arrival.at   .split('T')[1].substr(0,5);
+        return `${dep} – ${arr}`;
+    };
+    
+    // 날짜 포맷 (YYYY-MM-DD → “YYYY년 MM월 DD일”)
+    const formatDate = seg => {
+        const [year, month, day] = seg.departure.at.split('T')[0].split('-');
+        return `${year}년 ${month}월 ${day}일`;
+    };
+
     document.getElementById('search-btn').addEventListener('click', function() {
-        const planId = window.planId;
-        if (!planId) {
-            console.error('Plan ID is not defined.');
-            return;
-        }
-        const adults = document.getElementById('adults').value;
-        const earliest_dep = document.getElementById('earliest_dep').value;
-        const latest_arr = document.getElementById('latest_arr').value;
-    
-        const params = new URLSearchParams({ plan_id: planId, adults });
-        if (earliest_dep) params.append('earliest_dep', earliest_dep);
-        if (latest_arr) params.append('latest_arr', latest_arr);
-    
-        fetch(`/api/flight/search/?${params.toString()}`, { headers: { 'Accept': 'application/json' } })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                const tbody = document.getElementById('offers-body');
-                tbody.innerHTML = '';
-                const offers = data.offers || [];
-                offers.forEach(o => {
-                    const outboundSegments = o.itineraries[0].segments;
-                    const inboundSegments  = o.itineraries[1].segments;
-                    // 출국/귀국 항공사 코드
-                    const outboundCode = outboundSegments[0].carrierCode;
-                    const inboundCode  = inboundSegments[0].carrierCode;
-                    // 이름 및 로고 URL
-                    const outboundName = o.outboundAirlineName || outboundCode;
-                    const inboundName  = o.returnAirlineName  || inboundCode;
-                    const outboundLogo = `https://content.airhex.com/content/logos/airlines_${outboundCode}_75_75_s.png`;
-                    const inboundLogo  = `https://content.airhex.com/content/logos/airlines_${inboundCode}_75_75_s.png`;
-                    // 시간 정보
-                    const outDep = outboundSegments[0].departure.at;
-                    const outArr = outboundSegments[outboundSegments.length - 1].arrival.at;
-                    const inDep  = inboundSegments[0].departure.at;
-                    const inArr  = inboundSegments[inboundSegments.length - 1].arrival.at;
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                    <td>${o.id || 'N/A'}</td>
-                    <td>${o.price.total} ${o.price.currency}</td>
-                    <td><img src="${outboundLogo}" alt="${outboundName}" width="24" height="24" /> ${outboundName}</td>
-                    <td><img src="${inboundLogo}" alt="${inboundName}" width="24" height="24" /> ${inboundName}</td>
-                    <td>${outDep}</td>
-                    <td>${outArr}</td>
-                    <td>${inDep}</td>
-                    <td>${inArr}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(error => { console.error('Fetch error:', error); });
+      // window.planId 에서 바로 가져오기
+      const planId = window.planId;
+      if (!planId) {
+        console.error('Plan ID is not defined.');
+        return;
+      }
+  
+      const adults       = document.getElementById('adults').value;
+      const earliest_dep = document.getElementById('earliest_dep').value;
+      const latest_arr   = document.getElementById('latest_arr').value;
+  
+      const params = new URLSearchParams({ plan_id: planId, adults });
+      if (earliest_dep) params.append('earliest_dep', earliest_dep);
+      if (latest_arr)   params.append('latest_arr', latest_arr);
+  
+      fetch(`/api/flight/search/?${params.toString()}`, {
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error(response.statusText);
+        return response.json();
+      })
+      .then(data => {
+        const container = document.getElementById('flight-results');
+        container.innerHTML = '';
+  
+        (data.offers || []).forEach(o => {
+          const outSeg = o.itineraries[0].segments;
+          const inSeg  = o.itineraries[1].segments;
+
+          // 직항/경유 결정
+            const outType = outSeg.length > 1 ? '경유' : '직항';
+            const inType  = inSeg.length > 1  ? '경유' : '직항';
+  
+          // IATA 코드
+          const outOrigin = outSeg[0].departure.iataCode;
+          const outDest   = outSeg[outSeg.length - 1].arrival.iataCode;
+          const inOrigin  = inSeg[0].departure.iataCode;
+          const inDest    = inSeg[inSeg.length - 1].arrival.iataCode;
+  
+          // 시간 표현 (HH:MM – HH:MM)
+          const formatTime = seg => {
+            const dep = seg.departure.at.split('T')[1].substr(0,5);
+            const arr = seg.arrival.at .split('T')[1].substr(0,5);
+            return `${dep} – ${arr}`;
+          };
+  
+          // 카드 요소 생성
+          const card = document.createElement('div');
+          card.className = 'flight-card';
+          card.innerHTML = `
+                            <div class="flight-main">
+                                <div class="flight-header">다른 항공 선택하기 →</div>
+
+                                <!-- 출국 섹션 -->
+                                <div class="flight-section">
+                                <div class="segment-info">
+                                    <img src="https://content.airhex.com/content/logos/airlines_${outSeg[0].carrierCode}_75_75_s.png" alt="">
+                                    <div class="times">
+                                    <div class="date">${formatDate(outSeg[0])}</div>
+                                    <div class="time">${formatTime(outSeg[0])}</div>
+                                    <div class="route">${outOrigin} → ${outDest}</div>
+                                    </div>
+                                </div>
+                                <div class="details">${outType}</div>
+                                <div class="details">${o.duration || ''}</div>
+                                </div>
+
+                                <!-- 귀국 섹션 -->
+                                <div class="flight-section">
+                                <div class="segment-info">
+                                    <img src="https://content.airhex.com/content/logos/airlines_${inSeg[0].carrierCode}_75_75_s.png" alt="">
+                                    <div class="times">
+                                    <div class="date">${formatDate(inSeg[0])}</div>
+                                    <div class="time">${formatTime(inSeg[0])}</div>
+                                    <div class="route">${inOrigin} → ${inDest}</div>
+                                    </div>
+                                </div>
+                                <div class="details">${inType}</div>
+                                <div class="details">${o.duration || ''}</div>
+                                </div>
+                            </div>
+
+                            <div class="flight-side">
+                                <div class="price">${o.price.total} ${o.price.currency}</div>
+                                <div class="fare-info">일반석 · ${adults}인</div>
+                                <button class="btn-select">선택하기</button>
+                            </div>
+                            `;
+          container.appendChild(card);
         });
+      })
+      .catch(error => console.error('Fetch error:', error));
+    });
 </script>
