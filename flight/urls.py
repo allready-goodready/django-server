@@ -1,5 +1,10 @@
 from django.urls import path
-from .views import FlightSearchAPIView, AirportNearOriginAPIView, AirportNearDestAPIView
+from .views import (
+    FlightSearchAPIView,
+    FlightCandidatesAPIView,
+    AirportNearOriginAPIView,
+    AirportNearDestAPIView,
+)
 
 app_name = "flight"
 
