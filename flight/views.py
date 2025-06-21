@@ -50,13 +50,22 @@ class FlightSearchAPIView(APIView):
         # 2) Reference Data API 로 항공사명 조회
         airline_info = get_airlines_info(list(codes))
 
-        # 3) offers 에 airlineName 필드 주입
+        # 3) offers 에 outboundAirlineName, returnAirlineName 필드 주입
         for o in offers:
-            code = (
+            # 출국편 항공사 코드: validatingAirlineCodes 우선, 없으면 첫 세그먼트의 carrierCode
+            out_code = (
                 o.get("validatingAirlineCodes")
                 or [o["itineraries"][0]["segments"][0]["carrierCode"]]
             )[0]
-            o["airlineName"] = airline_info.get(code, {}).get("commonName", code)
+            # 귀국편 항공사 코드: return itinerary 첫 세그먼트의 carrierCode
+            in_code = o["itineraries"][1]["segments"][0]["carrierCode"]
+
+            o["outboundAirlineName"] = airline_info.get(out_code, {}).get(
+                "commonName", out_code
+            )
+            o["returnAirlineName"] = airline_info.get(in_code, {}).get(
+                "commonName", in_code
+            )
 
         # 시간 필터
         if earliest_dep:
