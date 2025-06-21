@@ -1,0 +1,101 @@
+<div id="flight-search-container">
+    <!-- 항공권 검색 폼 -->
+    <input type="hidden" id="plan-id" value="{{ plan_id }}" />
+    <input type="hidden" id="plan-end-date" value="{{ end_date }}" />
+    <div class="flight-search-form mb-3">
+        <label>성인 수</label>
+        <input type="number" id="adults" value="1" min="1" />
+        <label>최초 출발 시각</label>
+        <input type="time" id="earliest_dep" />
+        <label>마지막 귀국 시각</label>
+        <input type="time" id="latest_arr" />
+        <button id="search-btn">검색</button>
+    </div>
+    <!-- 검색 결과 테이블 -->
+    <div id="flight-results">
+        <table>
+            <thead>
+                <tr>
+                    <th>Offer ID</th>
+                    <th>가격</th>
+                    <th>출국 항공사</th>
+                    <th>귀국 항공사</th>
+                    <th colspan="2">출국편</th>
+                    <th colspan="2">귀국편</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th>출발 시각</th>
+                    <th>도착 시각</th>
+                    <th>출발 시각</th>
+                    <th>도착 시각</th>
+                </tr>
+            </thead>
+            <tbody id="offers-body">
+                <!-- JS로 결과 채움 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+  (function(){
+    document.getElementById('search-btn').addEventListener('click', function() {
+      const planId = window.planId;
+      if (!planId) {
+        console.error('Plan ID is not defined.');
+        return;
+      }
+      const adults = document.getElementById('adults').value;
+      const earliest_dep = document.getElementById('earliest_dep').value;
+      const latest_arr = document.getElementById('latest_arr').value;
+  
+      const params = new URLSearchParams({ plan_id: planId, adults });
+      if (earliest_dep) params.append('earliest_dep', earliest_dep);
+      if (latest_arr) params.append('latest_arr', latest_arr);
+  
+      fetch(`/api/flight/search/?${params.toString()}`, { headers: { 'Accept': 'application/json' } })
+        .then(response => {
+          if (!response.ok) throw new Error('Network response was not ok');
+          return response.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('offers-body');
+          tbody.innerHTML = '';
+          const offers = data.offers || [];
+          offers.forEach(o => {
+            const outboundSegments = o.itineraries[0].segments;
+            const inboundSegments  = o.itineraries[1].segments;
+            // 출국/귀국 항공사 코드
+            const outboundCode = (o.validatingAirlineCodes || [outboundSegments[0].carrierCode])[0];
+            const inboundCode  = inboundSegments[0].carrierCode;
+            // 이름 및 로고 URL
+            const outboundName = o.airlineName || outboundCode;
+            const inboundName  = o.returnAirlineName || inboundCode;
+            const outboundLogo = `https://content.airhex.com/content/logos/airlines_${outboundCode}_75_75_s.png`;
+            const inboundLogo  = `https://content.airhex.com/content/logos/airlines_${inboundCode}_75_75_s.png`;
+            // 시간 정보
+            const outDep = outboundSegments[0].departure.at;
+            const outArr = outboundSegments[outboundSegments.length - 1].arrival.at;
+            const inDep  = inboundSegments[0].departure.at;
+            const inArr  = inboundSegments[inboundSegments.length - 1].arrival.at;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${o.id || 'N/A'}</td>
+              <td>${o.price.total} ${o.price.currency}</td>
+              <td><img src="${outboundLogo}" alt="${outboundName}" width="24" height="24" /> ${outboundName}</td>
+              <td><img src="${inboundLogo}" alt="${inboundName}" width="24" height="24" /> ${inboundName}</td>
+              <td>${outDep}</td>
+              <td>${outArr}</td>
+              <td>${inDep}</td>
+              <td>${inArr}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(error => { console.error('Fetch error:', error); });
+    });
+  })();
+</script>
