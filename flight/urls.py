@@ -4,6 +4,8 @@ from .views import (
     FlightCandidatesAPIView,
     AirportNearOriginAPIView,
     AirportNearDestAPIView,
+    FlightSelectAPIView,
+    FlightBookAPIView,
 )
 
 app_name = "flight"
@@ -23,4 +25,6 @@ urlpatterns = [
     path(
         "candidates/", FlightCandidatesAPIView.as_view(), name="api_flight_candidates"
     ),
+    path("select/", FlightSelectAPIView.as_view(), name="api_flight_select"),
+    path("book/", FlightBookAPIView.as_view(), name="api_flight_book"),
 ]
