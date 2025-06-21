@@ -3,7 +3,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from planner.models import TravelPlan
-from .services import get_nearest_airport, search_flight_offers, prioritize_offers
+from .services import (
+    get_nearest_airport,
+    search_flight_offers,
+    prioritize_offers,
+    get_airlines_info,
+)
 from .models import FlightSelection
 
 
@@ -19,8 +24,8 @@ class FlightSearchAPIView(APIView):
         plan = get_object_or_404(TravelPlan, id=plan_id, user=request.user)
         origin_loc = plan.locations.filter(type="origin").first()
         dest_loc = plan.locations.filter(type="destination").first()
-        origin_airport = get_nearest_airport(origin_loc.latitude, origin_loc.longitude)
-        dest_airport = get_nearest_airport(dest_loc.latitude, dest_loc.longitude)
+        origin_airport = get_nearest_airport(origin_loc.lat, origin_loc.lng)
+        dest_airport = get_nearest_airport(dest_loc.lat, dest_loc.lng)
         if not origin_airport or not dest_airport:
             return Response({"error": "Airport info missing."}, status=400)
 
@@ -31,6 +36,28 @@ class FlightSearchAPIView(APIView):
             plan.end_date.isoformat(),
             adults=int(adults),
         )
+
+        # 1) 유니크 항공사 코드 추출
+        codes = set()
+        for o in offers:
+            # validatingAirlineCodes 우선, 없으면 첫 segment 의 carrierCode
+            code = (
+                o.get("validatingAirlineCodes")
+                or [o["itineraries"][0]["segments"][0]["carrierCode"]]
+            )[0]
+            codes.add(code)
+
+        # 2) Reference Data API 로 항공사명 조회
+        airline_info = get_airlines_info(list(codes))
+
+        # 3) offers 에 airlineName 필드 주입
+        for o in offers:
+            code = (
+                o.get("validatingAirlineCodes")
+                or [o["itineraries"][0]["segments"][0]["carrierCode"]]
+            )[0]
+            o["airlineName"] = airline_info.get(code, {}).get("commonName", code)
+
         # 시간 필터
         if earliest_dep:
             offers = [
