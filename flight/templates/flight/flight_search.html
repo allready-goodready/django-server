@@ -97,6 +97,19 @@
     font-family: 'Noto Sans KR', sans-serif;
     margin-bottom: 0.25rem;   /* 시간과 간격 */
 }
+.flight-card .btn-book {
+    width: 100%;
+    height: 2.5rem;
+    background: linear-gradient(135deg, #FE8115 0%, #EF233C 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: .5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+}
 </style>
 <div id="flight-search-container">
     <!-- 항공권 검색 폼 -->
@@ -215,12 +228,84 @@
                             <div class="flight-side">
                                 <div class="price">${o.price.total} ${o.price.currency}</div>
                                 <div class="fare-info">일반석 · ${adults}인</div>
-                                <button class="btn-select">선택하기</button>
+                                <button class="btn-select" data-offer-id="{{ o.id }}" data-offer-snapshot='${JSON.stringify(o)}''>
+                                선택하기
+                                </button>
                             </div>
                             `;
           container.appendChild(card);
         });
       })
       .catch(error => console.error('Fetch error:', error));
+    });
+
+    function getCookie(name) {
+        let value = null;
+        document.cookie.split(';').forEach(c => {
+          const [k,v] = c.trim().split('=');
+          if (k === name) value = decodeURIComponent(v);
+        });
+        return value;
+      }
+      const csrftoken = getCookie('csrftoken');
+    
+      document.getElementById('flight-results').addEventListener('click', async e => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+    
+        // 6-1) “선택하기” 클릭
+        if (btn.classList.contains('btn-select')) {
+            const prev = document.getElementById('flight-results').querySelector('.btn-book');
+            if (prev) {
+                prev.classList.replace('btn-book', 'btn-select');
+                prev.innerHTML = '선택하기';
+            }
+                
+
+            const offerId  = btn.dataset.offerId;
+            const snapshot = JSON.parse(btn.dataset.offerSnapshot);
+    
+            await fetch('/api/flight/select/', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+                'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                plan_id: window.planId,
+                offer_id: offerId,
+                offer_snapshot: snapshot
+                })
+            });
+            btn.classList.replace('btn-select', 'btn-book');
+            // 버튼 교체: 체크 이미지 + “예매하기”
+            btn.innerHTML = `
+            <img src="/static/images/check-broken.svg" width="16" height="16" alt="✓" />
+            예매하기
+            `;
+        }
+    
+        // 6-2) “예매하기” 클릭
+        else if (btn.classList.contains('btn-book')) {
+            const res = await fetch('/api/flight/book/', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+                'Accept': 'application/json'
+                },
+                body: JSON.stringify({ plan_id: window.planId })
+            });
+            const json = await res.json();
+    
+            if (res.ok) {
+                // 예: 결제 페이지로 리다이렉트하거나, 모달 표시
+                console.log('Booking success:', json.booking_data);
+            } else {
+                console.error('Booking failed:', json);
+                alert('예매에 실패했습니다.');
+            }
+        }
     });
 </script>
