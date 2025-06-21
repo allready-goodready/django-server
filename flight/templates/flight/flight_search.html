@@ -41,61 +41,59 @@
     </div>
 </div>
 <script>
-  (function(){
     document.getElementById('search-btn').addEventListener('click', function() {
-      const planId = window.planId;
-      if (!planId) {
-        console.error('Plan ID is not defined.');
-        return;
-      }
-      const adults = document.getElementById('adults').value;
-      const earliest_dep = document.getElementById('earliest_dep').value;
-      const latest_arr = document.getElementById('latest_arr').value;
-  
-      const params = new URLSearchParams({ plan_id: planId, adults });
-      if (earliest_dep) params.append('earliest_dep', earliest_dep);
-      if (latest_arr) params.append('latest_arr', latest_arr);
-  
-      fetch(`/api/flight/search/?${params.toString()}`, { headers: { 'Accept': 'application/json' } })
-        .then(response => {
-          if (!response.ok) throw new Error('Network response was not ok');
-          return response.json();
-        })
-        .then(data => {
-          const tbody = document.getElementById('offers-body');
-          tbody.innerHTML = '';
-          const offers = data.offers || [];
-          offers.forEach(o => {
-            const outboundSegments = o.itineraries[0].segments;
-            const inboundSegments  = o.itineraries[1].segments;
-            // 출국/귀국 항공사 코드
-            const outboundCode = (o.validatingAirlineCodes || [outboundSegments[0].carrierCode])[0];
-            const inboundCode  = inboundSegments[0].carrierCode;
-            // 이름 및 로고 URL
-            const outboundName = o.airlineName || outboundCode;
-            const inboundName  = o.returnAirlineName || inboundCode;
-            const outboundLogo = `https://content.airhex.com/content/logos/airlines_${outboundCode}_75_75_s.png`;
-            const inboundLogo  = `https://content.airhex.com/content/logos/airlines_${inboundCode}_75_75_s.png`;
-            // 시간 정보
-            const outDep = outboundSegments[0].departure.at;
-            const outArr = outboundSegments[outboundSegments.length - 1].arrival.at;
-            const inDep  = inboundSegments[0].departure.at;
-            const inArr  = inboundSegments[inboundSegments.length - 1].arrival.at;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${o.id || 'N/A'}</td>
-              <td>${o.price.total} ${o.price.currency}</td>
-              <td><img src="${outboundLogo}" alt="${outboundName}" width="24" height="24" /> ${outboundName}</td>
-              <td><img src="${inboundLogo}" alt="${inboundName}" width="24" height="24" /> ${inboundName}</td>
-              <td>${outDep}</td>
-              <td>${outArr}</td>
-              <td>${inDep}</td>
-              <td>${inArr}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        })
-        .catch(error => { console.error('Fetch error:', error); });
-    });
-  })();
+        const planId = window.planId;
+        if (!planId) {
+            console.error('Plan ID is not defined.');
+            return;
+        }
+        const adults = document.getElementById('adults').value;
+        const earliest_dep = document.getElementById('earliest_dep').value;
+        const latest_arr = document.getElementById('latest_arr').value;
+    
+        const params = new URLSearchParams({ plan_id: planId, adults });
+        if (earliest_dep) params.append('earliest_dep', earliest_dep);
+        if (latest_arr) params.append('latest_arr', latest_arr);
+    
+        fetch(`/api/flight/search/?${params.toString()}`, { headers: { 'Accept': 'application/json' } })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                const tbody = document.getElementById('offers-body');
+                tbody.innerHTML = '';
+                const offers = data.offers || [];
+                offers.forEach(o => {
+                    const outboundSegments = o.itineraries[0].segments;
+                    const inboundSegments  = o.itineraries[1].segments;
+                    // 출국/귀국 항공사 코드
+                    const outboundCode = outboundSegments[0].carrierCode;
+                    const inboundCode  = inboundSegments[0].carrierCode;
+                    // 이름 및 로고 URL
+                    const outboundName = o.outboundAirlineName || outboundCode;
+                    const inboundName  = o.returnAirlineName  || inboundCode;
+                    const outboundLogo = `https://content.airhex.com/content/logos/airlines_${outboundCode}_75_75_s.png`;
+                    const inboundLogo  = `https://content.airhex.com/content/logos/airlines_${inboundCode}_75_75_s.png`;
+                    // 시간 정보
+                    const outDep = outboundSegments[0].departure.at;
+                    const outArr = outboundSegments[outboundSegments.length - 1].arrival.at;
+                    const inDep  = inboundSegments[0].departure.at;
+                    const inArr  = inboundSegments[inboundSegments.length - 1].arrival.at;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                    <td>${o.id || 'N/A'}</td>
+                    <td>${o.price.total} ${o.price.currency}</td>
+                    <td><img src="${outboundLogo}" alt="${outboundName}" width="24" height="24" /> ${outboundName}</td>
+                    <td><img src="${inboundLogo}" alt="${inboundName}" width="24" height="24" /> ${inboundName}</td>
+                    <td>${outDep}</td>
+                    <td>${outArr}</td>
+                    <td>${inDep}</td>
+                    <td>${inArr}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => { console.error('Fetch error:', error); });
+        });
 </script>
