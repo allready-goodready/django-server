@@ -9,6 +9,8 @@ from onboard.views import (
     OnboardingOptionsView,
     CountryListView,
     InterestItemListView,
+    SaveChecklistAPI,
+    LoadChecklistAPI,
 )
 from onboard.views.checklist_views import ChecklistAPIView  
 from onboard.views.exchange_views import ExchangeRateAPI
@@ -30,6 +32,11 @@ urlpatterns = [
     path("vaccine-info/", VaccineInfoAPI.as_view(), name="vaccine-info"),
     path("required-vaccines/", RequiredVaccineListView.as_view(), name="required-vaccines"),
     path("checklist/", ChecklistAPIView.as_view(), name="checklist"),
+    
+    # 새로운 기능: 사용자별 체크리스트 저장 및 조회 API
+    path("checklist/save/", SaveChecklistAPI.as_view(), name="onboard-checklist-save"),
+    path("checklist/load/", LoadChecklistAPI.as_view(), name="onboard-checklist-load"),
+
 
     # Swagger 문서
     path("schema/", SpectacularAPIView.as_view(), name="schema"),

@@ -5,6 +5,14 @@ from rest_framework.response import Response
 from onboard.models import ChecklistItem
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import serializers
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from onboard.models import UserChecklist
+from onboard.serializers.checklist import UserChecklistSerializer
+from drf_spectacular.utils import extend_schema
+from rest_framework.permissions import IsAuthenticated
+
 
 class ChecklistItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,4 +38,31 @@ class ChecklistAPIView(APIView):
 
         items = ChecklistItem.objects.filter(country_code=country_code)
         serializer = ChecklistItemSerializer(items, many=True)
+        return Response(serializer.data)
+    
+class SaveChecklistAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=UserChecklistSerializer)
+    def post(self, request):
+        data = request.data.copy()
+        data['user'] = request.user.id
+        serializer = UserChecklistSerializer(data=data)
+        if serializer.is_valid():
+            checklist, created = UserChecklist.objects.update_or_create(
+                user=request.user,
+                country=data['country'],
+                req_id=data['req_id'],
+                defaults={'is_checked': data['is_checked']}
+            )
+            return Response(UserChecklistSerializer(checklist).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoadChecklistAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=UserChecklistSerializer(many=True))
+    def get(self, request):
+        qs = UserChecklist.objects.filter(user=request.user)
+        serializer = UserChecklistSerializer(qs, many=True)
         return Response(serializer.data)

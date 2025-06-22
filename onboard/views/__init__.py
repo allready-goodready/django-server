@@ -7,4 +7,5 @@ from .onboarding_views import (
     CountryListView,
     InterestItemListView,
 )
+from .checklist_views import SaveChecklistAPI, LoadChecklistAPI
 
