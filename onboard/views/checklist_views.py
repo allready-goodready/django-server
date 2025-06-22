@@ -12,6 +12,18 @@ from onboard.models import UserChecklist
 from onboard.serializers.checklist import UserChecklistSerializer
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import RetrieveAPIView
+from onboard.models.checklist_models import ChecklistItem
+from onboard.serializers.checklist import ChecklistDetailSerializer
+
+@extend_schema(
+    summary="체크리스트 항목 상세 조회",
+    description="ID를 기반으로 체크리스트 항목의 제목과 상세 설명을 반환합니다.",
+)
+class ChecklistDetailAPI(RetrieveAPIView):
+    queryset = ChecklistItem.objects.all()
+    serializer_class = ChecklistDetailSerializer
+    lookup_field = 'id'
 
 
 class ChecklistItemSerializer(serializers.ModelSerializer):

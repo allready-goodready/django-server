@@ -16,6 +16,8 @@ from onboard.views.checklist_views import ChecklistAPIView
 from onboard.views.exchange_views import ExchangeRateAPI
 from onboard.views.vaccine_views import VaccineInfoAPI
 from onboard.views.required_vaccine_views import RequiredVaccineListView
+from onboard.views.checklist_views import ChecklistDetailAPI
+
 
 urlpatterns = [
     # 온보딩 API
@@ -41,4 +43,6 @@ urlpatterns = [
     # Swagger 문서
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    
+    path('checklist/<int:id>/', ChecklistDetailAPI.as_view(), name='checklist-detail'),
 ]
