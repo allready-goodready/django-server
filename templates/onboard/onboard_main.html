@@ -1,10 +1,179 @@
-<!-- onboard/templates/onboard/onboard_main.html -->
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>여행자 온보딩</title>
+  <meta charset="UTF-8">
+  <title>여행 온보딩</title>
+  <style>
+    .checklist-item {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      background: #f9f9f9;
+    }
+    .checklist-item strong {
+      font-size: 1.1rem;
+    }
+    .checklist-item .fallback {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    h2 {
+      margin-top: 2rem;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
-    <h1>여행자 온보딩 메인 페이지입니다</h1>
+  <h1>희망 국가 선택</h1>
+  <select id="countries"></select>
+
+  <h1>관심 항목 선택</h1>
+  <div id="interests"></div>
+
+  <button id="saveBtn">저장하기</button>
+
+  <div id="vaccine-info" style="margin-top: 20px;"></div>
+
+  <h1>여행 체크리스트</h1>
+  <div id="checklist-container"></div>
+
+  <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const countrySelect = document.getElementById("countries");
+      const interestDiv = document.getElementById("interests");
+      const checklistContainer = document.getElementById("checklist-container");
+
+      const optionsRes = await fetch("/api/onboard/options/");
+      const data = await optionsRes.json();
+
+      // 국가 select box
+      data.countries.forEach(country => {
+        const option = document.createElement("option");
+        option.value = country.id;
+        option.textContent = country.name;
+        option.setAttribute("data-code", country.code);
+        countrySelect.appendChild(option);
+      });
+
+      // 관심 항목 checkbox
+      data.categories.forEach(cat => {
+        const catLabel = document.createElement("div");
+        catLabel.innerHTML = `<strong>${cat.name}</strong>`;
+        interestDiv.appendChild(catLabel);
+
+        cat.items.forEach(item => {
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = item.id;
+          checkbox.id = `item-${item.id}`;
+
+          const label = document.createElement("label");
+          label.htmlFor = checkbox.id;
+          label.textContent = item.name;
+
+          const wrapper = document.createElement("div");
+          wrapper.appendChild(checkbox);
+          wrapper.appendChild(label);
+
+          interestDiv.appendChild(wrapper);
+        });
+      });
+
+      // 초기 선택 국가의 백신 정보도 로딩
+      const initialSelected = countrySelect.options[0];
+      if (initialSelected) {
+        const code = initialSelected.getAttribute("data-code");
+        if (code) {
+          await fetchRequiredVaccines(code);
+        }
+      }
+
+      // 저장 버튼 이벤트
+      document.getElementById("saveBtn").addEventListener("click", async () => {
+        const selectedCountry = countrySelect.value;
+        const selectedItems = Array.from(
+          document.querySelectorAll("#interests input:checked")
+        ).map(cb => parseInt(cb.value));
+
+        const csrfToken = document.getElementById("csrf-token").value;
+
+        const res = await fetch("/api/onboard/save/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken
+          },
+          body: JSON.stringify({
+            country: parseInt(selectedCountry),
+            items: selectedItems
+          })
+        });
+
+        if (res.ok) {
+          alert("온보딩 정보가 저장되었습니다.");
+        } else {
+          const error = await res.json();
+          console.error("저장 실패:", error);
+          alert("저장 실패: " + (error?.detail || "알 수 없는 에러"));
+        }
+      });
+
+      // 국가 선택 시 백신 정보 가져오기
+      countrySelect.addEventListener("change", async () => {
+        const selected = countrySelect.selectedOptions[0];
+        const code = selected.getAttribute("data-code");
+        if (!code) return;
+
+        await fetchRequiredVaccines(code);
+      });
+
+      async function fetchRequiredVaccines(code) {
+        try {
+          const res = await fetch(`/api/onboard/required-vaccines/?country_code=${code}`);
+          const data = await res.json();
+
+          const div = document.getElementById("vaccine-info");
+          if (res.ok) {
+            div.innerHTML = `<strong>${data.country} 필요한 백신:</strong><br>${data.required_vaccines.join(', ')}`;
+          } else {
+            div.innerText = "백신 정보를 불러오지 못했습니다.";
+          }
+        } catch (err) {
+          document.getElementById("vaccine-info").innerText = "백신 정보를 불러오지 못했습니다.";
+        }
+      }
+
+      // ✅ 체크리스트 항목 렌더링
+      const checklistRes = await fetch("/api/onboard/checklist/");
+      const checklist = await checklistRes.json();
+
+      let currentCategory = "";
+      checklist.forEach(item => {
+        if (item.category !== currentCategory) {
+          const h2 = document.createElement("h2");
+          h2.textContent = item.category;
+          checklistContainer.appendChild(h2);
+          currentCategory = item.category;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("checklist-item");
+
+        wrapper.innerHTML = `
+          <label>
+            <input type="checkbox" name="${item.req_id}" />
+            <strong>${item.feature}</strong>
+          </label>
+          <p>${item.description}</p>
+          <small class="fallback">※ ${item.fallback_message}</small>
+        `;
+
+        checklistContainer.appendChild(wrapper);
+      });
+    });
+  </script>
 </body>
 </html>

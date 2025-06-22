@@ -138,7 +138,7 @@ body:
   - type: textarea
     id: acceptance_criteria
     attributes:
-      label: "✅ 인수 조건 (Acceptance Criteria)"
+      label: "인수 조건 (Acceptance Criteria)"
       description: |
         - 기능 명세서 및 입력, 예외 처리 등을 참고하여 만족해야 할 조건을 작성하세요.  
         - 완료 기준을 하나씩 체크박스로 작성하세요.

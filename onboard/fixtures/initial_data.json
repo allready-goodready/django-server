@@ -1,0 +1,51 @@
+[
+    {
+      "model": "onboard.country",
+      "pk": 1,
+      "fields": {
+        "name": "미국",
+        "code": "US"
+      }
+    },
+    {
+      "model": "onboard.country",
+      "pk": 2,
+      "fields": {
+        "name": "일본",
+        "code": "JP"
+      }
+    },
+    {
+      "model": "onboard.vaccine",
+      "pk": 1,
+      "fields": {
+        "code": "MMR",
+        "name": "홍역·볼거리·풍진(MMR) 백신"
+      }
+    },
+    {
+      "model": "onboard.vaccine",
+      "pk": 2,
+      "fields": {
+        "code": "YF",
+        "name": "황열 백신"
+      }
+    },
+    {
+      "model": "onboard.requiredvaccine",
+      "pk": 1,
+      "fields": {
+        "country": 1,
+        "vaccine": 1
+      }
+    },
+    {
+      "model": "onboard.requiredvaccine",
+      "pk": 2,
+      "fields": {
+        "country": 2,
+        "vaccine": 2
+      }
+    }
+  ]
+  
