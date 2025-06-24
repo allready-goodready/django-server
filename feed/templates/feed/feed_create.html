@@ -5,9 +5,9 @@
     <!-- 바깥 X 버튼 -->
     <span class="modal_close_outer" id="close_create_modal_x">×</span>
 
-    <div class="create_modal_window" style="width: 850px; max-width: 90%; font-size: 14px;">
+    <div class="create_modal_window">
         <div class="feed_create_nav d-flex align-items-center position-relative px-3">
-            <span class="material-icons-outlined" id="close_create_modal" style="cursor: pointer;">arrow_back</span>
+            <span class="material-icons-outlined" id="close_create_modal">arrow_back</span>
             <div class="modal_title_text position-absolute start-50 translate-middle-x">새 게시물 만들기</div>
             <a id="button_write_feed" href="#" class="feed_create_next position-absolute end-0 pe-3 text-decoration-none">공유하기</a>
         </div>
@@ -24,10 +24,10 @@
                     </div>
                     <span id="input_user_id" class="feed_name_txt"> {{ username }} </span>
                 </div>
-                <div style="height: 440px">
+                <div id="detail_caption_section">
                     <textarea id="input_caption" class="feed_content_textarea form-control" rows="10" placeholder="설명을 입력하세요..."></textarea>
                     
-                    <div class="text-end pe-3" style="font-size: 12px; color: gray;">
+                    <div class="text-end pe-3 caption_count_text">
                         <span id="content_count">0</span>/200
                     </div>
                     <!-- 여행지 입력 영역 -->

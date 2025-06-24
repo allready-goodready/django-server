@@ -41,6 +41,7 @@
 
 .create_modal_window {
     width: 850px;
+    max-width: 90%;
     font-size: 14px;
     position: relative;
     max-height: 90vh;
@@ -56,12 +57,18 @@
 .modal_title_text {
     font-size: 18px;
     font-weight: bold;
+
+    position: absolute; 
+    left: 50%; 
+    transform: translateX(-50%);
 }
 
 .feed_create_next {
     font-size: 12px;
     font-weight: normal;
     color: #0d6efd;
+    
+    cursor: pointer;
 }
 
 /* 공통 화살표 스타일 */
@@ -102,6 +109,12 @@
 /* create 모달 */
     {
     opacity: 0.5;
+}
+
+/* 뒤로 가기 */
+#close_crop_modal,
+#close_create_modal {
+    cursor: pointer;
 }
 
 /* 닫기 버튼 */
@@ -253,10 +266,17 @@ s #crop_target_image {
     opacity: 1;
 }
 
+#cropper_container {
+    position: relative; 
+    width: 80%; 
+    height: 80%;
+}
+
 /* 세번째 모달 */
 .modal_image_content {
     display: flex;
     flex-direction: row;
+    min-height: 550px;
 }
 
 .modal_image_upload_content {
@@ -332,10 +352,20 @@ s #crop_target_image {
     font-weight: bold;
 }
 
+.detail_caption_section {
+  height: 440px;
+}
+
+.caption_count_text {
+  font-size: 12px;
+  color: gray;
+}
+
 /* 텍스트 입력 / 입력창 아이콘 */
 .feed_content_textarea {
     resize: none;
     width: 294px;
+    /* width: 100%; */
     border: none;
 }
 

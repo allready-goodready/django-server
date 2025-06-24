@@ -80,8 +80,12 @@ function loadCropperImage() {
 function setupArrowButtons() {
     const container = document.querySelector(".crop_modal_content");
 
+    // 기존 화살표 제거
     container.querySelectorAll(".crop-arrow").forEach(el => el.remove());
 
+    // 이미지가 한 장일 경우 → 화살표 만들지 않음
+    if (imageList.length <= 1) return;
+    
     const leftArrow = document.createElement("button");
     leftArrow.innerHTML = "&#10094;";
     leftArrow.className = "arrow left";
