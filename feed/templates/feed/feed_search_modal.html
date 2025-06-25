@@ -1,0 +1,20 @@
+<!-- 검색 모달 -->
+<div id="search_place_modal" class="modal" style="display: none;">
+  <div class="modal-content bg-white p-4 rounded" style="width: 500px; max-width: 90%;">
+    <!-- 닫기 버튼 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">여행지 검색</h5>
+      <span id="close_search_modal" class="material-icons-outlined" style="cursor: pointer;">close</span>
+    </div>
+
+    <!-- 검색창 -->
+    <input id="place_input" type="text" class="form-control" placeholder="여행지를 검색하세요" autocomplete="off">
+
+    <!-- 자동완성 결과 리스트 -->
+    <ul id="place_suggestions" class="list-group" style="position: relative; z-index: 11000;"></ul>
+
+
+    <!-- 결과 안내 -->
+    <p class="text-muted mt-2" style="font-size: 13px;">선택한 장소는 자동으로 입력칸에 적용됩니다.</p>
+  </div>
+</div>
