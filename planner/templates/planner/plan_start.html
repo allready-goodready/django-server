@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block css %}
+  <style>
+  .plan-container {
+    width: 1000px;
+    max-width: 1000px;
+    height: 60px;
+    margin: 0 auto;
+    background: white;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.25);
+    border-radius: 7px;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .budget-section {
+    width: 300px;
+    height: 60px;
+    padding: 17px 10px;
+    background: white;
+    overflow: hidden;
+    border-radius: 5px;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .date-section {
+    align-self: stretch;
+    position: relative;
+    border-radius: 5px;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+  }
+  .date-input {
+    width: 170px;
+    height: 60px;
+    font-family: "Noto Sans KR";
+    line-height: 1;
+  }
+  .divider {
+    height: 40px;
+    border-left: 1px solid #e5e5e5;
+  }
+  .guest-section {
+    width: 150px;
+    height: 60px;
+    display: inline-flex;
+    align-items: center;
+    background: white;
+    border-radius: 5px;
+    justify-content: flex-start;
+    gap: 5px;
+  }
+  .guest-group {
+    width: 150px;
+  }
+  .search-btn {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #fe8115 0%, #ef233c 100%);
+    border-radius: 5px;
+  }
+  .search-btn img {
+    display: block;
+    width: 16.8px;
+    height: 16.8px;
+  }
+  /* 공통 폰트/라인히트 */
+  .plan-container input,
+  .plan-container .input-group-text {
+    font-family: "Noto Sans KR";
+    line-height: 1;
+  }
+
+  .error-text {
+    color: #FE8115;
+    font-size: 12px;
+    font-family: "Noto Sans KR";
+    font-weight: 300;
+  }
+  .disabled-by-js {
+    pointer-events: none;
+  }
+  </style>
+{% endblock css %}
+{% block content %}
+  <div id="origin-section" class="disabled-by-js opacity-50">{% include 'planner/origin_select.html' %}</div>
+  <div id="destination-section" class="disabled-by-js opacity-50">{% include 'planner/destination_select.html' %}</div>
+  <!-- 예산·일정·객수 컨테이너 -->
+  <form id="plan-form" class="plan-container px-2">
+    {% csrf_token %}
+    <!-- 1) 예산 입력 영역 -->
+    <div class="budget-section d-inline-flex">
+      <input type="number"
+             name="budget_limit"
+             min="0"
+             step="1"
+             class="form-control border-0 fs-5 fw-light text-center"
+             placeholder="예산을 입력하세요"
+             aria-label="예산 입력" />
+      <div class="d-flex align-items-center ms-2">
+        <img src="/static/images/won.svg"
+             alt="₩"
+             width="26"
+             height="24"
+             class="opacity-25" />
+        <i class="bi bi-chevron-down ms-2" style="font-size:1rem;"></i>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <!-- 2) 일정 선택 영역 -->
+    <div class="date-section">
+      <input type="date"
+             name="start_date"
+             class="form-control border-0 text-center fw-light fs-5 date-input"
+             placeholder="시작일"
+             aria-label="여행 시작일" />
+      <span class="text-muted fs-4">–</span>
+      <input type="date"
+             name="end_date"
+             class="form-control border-0 text-center fw-light fs-5 date-input"
+             placeholder="종료일"
+             aria-label="여행 종료일" />
+    </div>
+    <div class="divider"></div>
+    <!-- 3) 객수 입력 영역 -->
+    <div class="guest-section">
+      <div class="input-group guest-group">
+        <input type="number"
+               name="guest_count"
+               min="1"
+               step="1"
+               placeholder="여행객"
+               aria-label="여행객 수"
+               class="form-control border-0 text-center fs-5 fw-light" />
+        <span class="input-group-text bg-white border-0 fs-5 fw-light">명</span>
+      </div>
+    </div>
+    <!-- 여행 계획 생성 시작 버튼 -->
+    <button type="submit"
+            class="search-btn d-inline-flex align-items-center justify-content-center p-0 border-0"
+            aria-label="여행 계획 생성 시작">
+      <img src="/static/images/search.svg" alt="검색" />
+    </button>
+  </form>
+  <!-- 항공권 검색 템플릿 삽입 (출발지·도착지 모두 설정된 후 활성화) -->
+  <div id="flight-search-wrapper" class="disabled-by-js opacity-50">
+    {% include 'flight/flight_search.html' with plan_id=plan_id %}
+  </div>
+  <!-- 에러 메시지 출력 영역 -->
+  <div id="form-error" class="error-text mt-1"></div>
+  <script>
+    const form = document.getElementById("plan-form");
+    const errorEl = document.getElementById("form-error");
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith(name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      errorEl.textContent = "";
+
+      const budget = this.budget_limit.value;
+      const startVal = this.start_date.value;
+      const endVal = this.end_date.value;
+      const guestCount = this.guest_count.value;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (!startVal || !endVal) {
+        errorEl.textContent = "시작일과 종료일을 입력해주세요.";
+        return;
+      }
+
+      const start = new Date(startVal);
+      const end = new Date(endVal);
+
+      if (start < today) {
+        errorEl.textContent = "여행 시작일은 오늘 또는 이후의 날짜여야 합니다.";
+        return;
+      } else if (start > end) {
+        errorEl.textContent = "여행 시작일은 종료일 이전이거나 같아야 합니다.";
+        return;
+      }
+
+      // CSRF 토큰 준비
+      const csrftoken = getCookie("csrftoken");
+
+      // 요청 바디 데이터 구성
+      const bodyData = {
+        budget_limit: budget ? parseInt(budget) : null,
+        start_date: startVal,
+        end_date: endVal,
+        guest_count: guestCount ? parseInt(guestCount) : 1,
+      };
+
+      // TravelPlan 생성 API 호출
+      fetch("/api/plan/travelplan/", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrftoken,
+        },
+        body: JSON.stringify(bodyData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((data) => {
+              throw new Error(
+                data.detail || "TravelPlan 생성에 실패했습니다."
+              );
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // 생성된 plan의 ID를 전역 변수로 설정하고 destination 섹션 보이기
+          window.planId = data.id;
+          const destSection = document.getElementById("destination-section");
+          const orgSection = document.getElementById("origin-section");
+          destSection.classList.remove("disabled-by-js", "opacity-50");
+          orgSection.classList.remove("disabled-by-js", "opacity-50");
+          const flightWrapper = document.getElementById('flight-search-wrapper');
+          flightWrapper.classList.remove('disabled-by-js', 'opacity-50');
+        })
+        .catch((error) => {
+          console.error("Error creating TravelPlan:", error);
+          errorEl.textContent = error.message;
+        });
+    });
+  </script>
+  <script async
+          defer
+          src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&v=beta&libraries=places,marker&callback=initMap"></script>
+{% endblock content %}
