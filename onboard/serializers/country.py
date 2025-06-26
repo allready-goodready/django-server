@@ -5,7 +5,7 @@ from onboard.models import UserChecklist
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'code']
 
 class CountryDetailSerializer(serializers.ModelSerializer):
     class Meta:

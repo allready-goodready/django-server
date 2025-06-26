@@ -12,12 +12,12 @@ from onboard.views import (
     SaveChecklistAPI,
     LoadChecklistAPI,
 )
+from onboard.views.exchange_views import ExtraInfoView
 from onboard.views.checklist_views import ChecklistAPIView  
-from onboard.views.exchange_views import ExchangeRateAPI
+from onboard.views.exchange_views import ExchangeRateView
 from onboard.views.vaccine_views import VaccineInfoAPI
 from onboard.views.required_vaccine_views import RequiredVaccineListView
 from onboard.views.checklist_views import ChecklistDetailAPI
-
 
 urlpatterns = [
     # 온보딩 API
@@ -30,7 +30,8 @@ urlpatterns = [
     path("interests/", InterestItemListView.as_view(), name="interest-list"),
 
     # 외부 정보 API
-    path("exchange-rate/", ExchangeRateAPI.as_view(), name="exchange-rate"),
+    path("exchange-rate/", ExchangeRateView.as_view(), name="exchange-rate"),
+    path("extra-info/", ExtraInfoView.as_view(), name="extra-info"),
     path("vaccine-info/", VaccineInfoAPI.as_view(), name="vaccine-info"),
     path("required-vaccines/", RequiredVaccineListView.as_view(), name="required-vaccines"),
     path("checklist/", ChecklistAPIView.as_view(), name="checklist"),
@@ -39,10 +40,9 @@ urlpatterns = [
     path("checklist/save/", SaveChecklistAPI.as_view(), name="onboard-checklist-save"),
     path("checklist/load/", LoadChecklistAPI.as_view(), name="onboard-checklist-load"),
 
-
     # Swagger 문서
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    
     path('checklist/<int:id>/', ChecklistDetailAPI.as_view(), name='checklist-detail'),
+
 ]

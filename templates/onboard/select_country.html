@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Select Country{% endblock %}
+
+{% block content %}
+<h2>국가 선택</h2>
+<select id="country-select" class="form-select mb-3">
+    <option value="" selected disabled>-- 국가를 선택해주세요 --</option>
+</select>
+<button class="btn btn-primary" id="next-button">다음</button>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(document).ready(function () {
+    $.get('/api/onboard/countries/', function (data) {
+        data.forEach(function (country) {
+            $('#country-select').append(`<option value="${country.code}">${country.name}</option>`);
+        });
+    });
+
+    $('#next-button').click(function () {
+        const selected = $('#country-select').val();
+        if (selected) {
+            window.location.href = `/onboard/checklist/?country_code=${selected}`;
+        } else {
+            alert('국가를 선택해주세요.');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checklist{% endblock %}
+
+{% block content %}
+<h2>출국 준비 체크리스트</h2>
+<form id="checklist-form" class="mb-3"></form>
+<button class="btn btn-success" id="save-checklist">저장</button>
+<a class="btn btn-secondary" id="next-info" style="margin-left: 10px;">추가 정보 보기</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const countryCode = urlParams.get('country_code');
+
+$(document).ready(function () {
+    $.get(`/api/onboard/checklist/?country_code=${countryCode}`, function (data) {
+        if (data.length === 0) {
+            $('#checklist-form').html('<p>체크리스트 항목이 없습니다.</p>');
+            return;
+        }
+
+        data.forEach(item => {
+            $('#checklist-form').append(`
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${item.req_id}" id="item-${item.req_id}">
+                    <label class="form-check-label" for="item-${item.req_id}">
+                        ${item.feature} - ${item.message}
+                    </label>
+                </div>
+            `);
+        });
+    });
+
+    $('#save-checklist').click(function (e) {
+        e.preventDefault();
+        const checkedItems = $('#checklist-form input:checked').map((_, el) => el.value).get();
+
+        $.ajax({
+            url: '/api/onboard/checklist/save/',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                country_code: countryCode,
+                checklist_item_ids: checkedItems
+            }),
+            success: function () {
+                alert('저장되었습니다!');
+            }
+        });
+    });
+
+    $('#next-info').click(function () {
+        window.location.href = `/onboard/extra-info/?country_code=${countryCode}`;
+    });
+});
+</script>
+{% endblock %}

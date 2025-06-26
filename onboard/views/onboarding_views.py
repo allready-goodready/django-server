@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema
+from django.shortcuts import render
+
 
 from ..models import Country, InterestItem, UserOnboarding, InterestCategory
 from ..serializers import CountrySerializer, InterestItemSerializer
@@ -85,3 +87,16 @@ class CountryListView(ListAPIView):
 class InterestItemListView(ListAPIView):
     queryset = InterestItem.objects.all()
     serializer_class = InterestItemSerializer
+
+# --- 템플릿용 화면 렌더링 함수 추가 ---
+
+
+def select_country(request):
+    return render(request, "onboard/select_country.html")
+
+def checklist(request):
+    return render(request, "onboard/checklist.html")
+
+def extra_info(request):
+    return render(request, "onboard/extra_info.html")
+
