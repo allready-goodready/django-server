@@ -7,6 +7,11 @@ from rest_framework.response import Response
 from config.permissions import IsOwnerOrReadOnly
 from config.paginations import DefaultPagination
 
+# drf-spectacular 문서화 데코레이터
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.openapi import OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+
 from .models import TravelPlan, Location
 from .serializers import (
     TravelPlanDraftSerializer,
@@ -17,6 +22,38 @@ from .serializers import (
 from .services import confirm_travelplan, upsert_location
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Planner"],
+        summary="여행 계획 목록 조회",
+        description="사용자의 모든 여행 계획을 조회합니다.",
+    ),
+    create=extend_schema(
+        tags=["Planner"],
+        summary="여행 계획 생성",
+        description="새로운 여행 계획을 Draft 상태로 생성합니다.",
+    ),
+    retrieve=extend_schema(
+        tags=["Planner"],
+        summary="여행 계획 상세 조회",
+        description="특정 여행 계획의 상세 정보를 조회합니다.",
+    ),
+    update=extend_schema(
+        tags=["Planner"],
+        summary="여행 계획 수정",
+        description="Draft 상태의 여행 계획을 수정합니다.",
+    ),
+    partial_update=extend_schema(
+        tags=["Planner"],
+        summary="여행 계획 부분 수정",
+        description="Draft 상태의 여행 계획을 부분적으로 수정합니다.",
+    ),
+    destroy=extend_schema(
+        tags=["Planner"],
+        summary="여행 계획 삭제",
+        description="여행 계획을 삭제합니다.",
+    ),
+)
 class TravelPlanViewSet(viewsets.ModelViewSet):
     """
     TravelPlan 생성, 조회, 수정, 삭제, 그리고 Confirm(최종 확정) 기능을 모두 제공합니다.
@@ -48,6 +85,16 @@ class TravelPlanViewSet(viewsets.ModelViewSet):
         # create 시 status='draft'로 저장하는 로직은 Serializer.create() 내부에서 처리됨
         serializer.save()
 
+    @extend_schema(
+        tags=["Planner"],
+        summary="여행 계획 확정",
+        description="Draft 상태의 여행 계획을 최종 확정(confirmed) 상태로 변경합니다.",
+        request=None,
+        responses={
+            200: TravelPlanDraftSerializer,
+            400: {"description": "확정할 수 없는 상태 (필수 정보 누락 등)"},
+        },
+    )
     @action(detail=True, methods=["post"])
     def confirm(self, request, pk=None):
         """
@@ -74,6 +121,40 @@ class TravelPlanViewSet(viewsets.ModelViewSet):
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Planner"],
+        summary="목적지 목록 조회",
+        description="사용자의 여행 계획에 등록된 목적지 목록을 조회합니다.",
+        parameters=[
+            OpenApiParameter(
+                name="plan",
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                description="여행 계획 ID로 필터링",
+            ),
+        ],
+    ),
+    create=extend_schema(
+        tags=["Planner"],
+        summary="목적지 추가/수정",
+        description="여행 계획에 목적지를 추가하거나 수정합니다. 같은 place_id가 있으면 수정, 없으면 추가됩니다.",
+        examples=[
+            OpenApiExample(
+                "목적지 추가 예시",
+                value={
+                    "plan": "550e8400-e29b-41d4-a716-446655440000",
+                    "place_id": "ChIJ4QOYM4GhfDUR1kPR_tLW1A0",
+                    "name": "제주도",
+                    "address": "제주특별자치도",
+                    "lat": 33.4996,
+                    "lng": 126.5312,
+                },
+                request_only=True,
+            )
+        ],
+    ),
+)
 class DestinationViewSet(
     viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin
 ):
@@ -144,6 +225,40 @@ class DestinationViewSet(
         return Response(output, status=status_code)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Planner"],
+        summary="출발지 목록 조회",
+        description="사용자의 여행 계획에 등록된 출발지 목록을 조회합니다.",
+        parameters=[
+            OpenApiParameter(
+                name="plan",
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                description="여행 계획 ID로 필터링",
+            ),
+        ],
+    ),
+    create=extend_schema(
+        tags=["Planner"],
+        summary="출발지 추가/수정",
+        description="여행 계획에 출발지를 추가하거나 수정합니다. 같은 place_id가 있으면 수정, 없으면 추가됩니다.",
+        examples=[
+            OpenApiExample(
+                "출발지 추가 예시",
+                value={
+                    "plan": "550e8400-e29b-41d4-a716-446655440000",
+                    "place_id": "ChIJwULG5WSOdDURStClk2-oPNE",
+                    "name": "인천국제공항",
+                    "address": "인천광역시 중구 공항로 272",
+                    "lat": 37.4449,
+                    "lng": 126.4656,
+                },
+                request_only=True,
+            )
+        ],
+    ),
+)
 class OriginViewSet(
     viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin
 ):
