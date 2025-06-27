@@ -1,0 +1,1158 @@
+openapi: 3.0.3
+info:
+  title: AllReady API
+  version: 1.0.0
+  description: AllReady 여행 플래너 API 문서
+paths:
+  /api/flight/airports/from/:
+    get:
+      operationId: api_flight_airports_from_retrieve
+      description: 여행 계획의 출발지 근처에 있는 공항 정보를 조회합니다.
+      summary: 출발지 근처 공항 조회
+      parameters:
+      - in: query
+        name: plan_id
+        schema:
+          type: string
+          format: uuid
+        description: 여행 계획 ID
+        required: true
+      tags:
+      - Flight
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/flight/airports/to/:
+    get:
+      operationId: api_flight_airports_to_retrieve
+      description: 여행 계획의 목적지 근처에 있는 공항 정보를 조회합니다.
+      summary: 목적지 근처 공항 조회
+      parameters:
+      - in: query
+        name: plan_id
+        schema:
+          type: string
+          format: uuid
+        description: 여행 계획 ID
+        required: true
+      tags:
+      - Flight
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/flight/book/:
+    post:
+      operationId: api_flight_book_create
+      description: 선택한 항공편을 실제로 예약합니다.
+      summary: 항공편 예약
+      tags:
+      - Flight
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  format: uuid
+                  description: 여행 계획 ID
+              required:
+              - plan_id
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: 예약 성공
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: 예약 실패 (사용자 정보 부족 등)
+          description: ''
+  /api/flight/candidates/:
+    get:
+      operationId: api_flight_candidates_retrieve
+      description: 이전에 검색한 항공편 후보들을 조회합니다.
+      summary: 항공편 후보 조회
+      parameters:
+      - in: query
+        name: plan_id
+        schema:
+          type: string
+          format: uuid
+        description: 여행 계획 ID
+        required: true
+      tags:
+      - Flight
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/flight/search/:
+    get:
+      operationId: api_flight_search_retrieve
+      description: 여행 계획을 기반으로 항공편을 검색합니다.
+      summary: 항공편 검색
+      parameters:
+      - in: query
+        name: adults
+        schema:
+          type: integer
+        description: '성인 승객 수 (기본값: 1)'
+      - in: query
+        name: earliest_dep
+        schema:
+          type: string
+        description: 최소 출발 시간 (HH:MM 형식)
+      - in: query
+        name: latest_arr
+        schema:
+          type: string
+        description: 최대 도착 시간 (HH:MM 형식)
+      - in: query
+        name: plan_id
+        schema:
+          type: string
+          format: uuid
+        description: 여행 계획 ID
+        required: true
+      tags:
+      - Flight
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/flight/select/:
+    post:
+      operationId: api_flight_select_create
+      description: 검색된 항공편 중 하나를 선택합니다.
+      summary: 항공편 선택
+      tags:
+      - Flight
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  format: uuid
+                  description: 여행 계획 ID
+                offer_id:
+                  type: string
+                  description: 선택할 항공편 제안 ID
+                offer_snapshot:
+                  type: object
+                  description: 선택한 항공편의 상세 정보
+              required:
+              - plan_id
+              - offer_id
+              - offer_snapshot
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/plan/destination/:
+    get:
+      operationId: api_plan_destination_list
+      description: 사용자의 여행 계획에 등록된 목적지 목록을 조회합니다.
+      summary: 목적지 목록 조회
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: plan
+        schema:
+          type: string
+          format: uuid
+        description: 여행 계획 ID로 필터링
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLocationModelList'
+          description: ''
+    post:
+      operationId: api_plan_destination_create
+      description: 여행 계획에 목적지를 추가하거나 수정합니다. 같은 place_id가 있으면 수정, 없으면 추가됩니다.
+      summary: 목적지 추가/수정
+      tags:
+      - Planner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationModelRequest'
+            examples:
+              목적지추가예시:
+                value:
+                  plan: 550e8400-e29b-41d4-a716-446655440000
+                  place_id: ChIJ4QOYM4GhfDUR1kPR_tLW1A0
+                  name: 제주도
+                  address: 제주특별자치도
+                  lat: 33.4996
+                  lng: 126.5312
+                summary: 목적지 추가 예시
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LocationModelRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LocationModelRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationModel'
+          description: ''
+  /api/plan/origin/:
+    get:
+      operationId: api_plan_origin_list
+      description: 사용자의 여행 계획에 등록된 출발지 목록을 조회합니다.
+      summary: 출발지 목록 조회
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: plan
+        schema:
+          type: string
+          format: uuid
+        description: 여행 계획 ID로 필터링
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLocationModelList'
+          description: ''
+    post:
+      operationId: api_plan_origin_create
+      description: 여행 계획에 출발지를 추가하거나 수정합니다. 같은 place_id가 있으면 수정, 없으면 추가됩니다.
+      summary: 출발지 추가/수정
+      tags:
+      - Planner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationModelRequest'
+            examples:
+              출발지추가예시:
+                value:
+                  plan: 550e8400-e29b-41d4-a716-446655440000
+                  place_id: ChIJwULG5WSOdDURStClk2-oPNE
+                  name: 인천국제공항
+                  address: 인천광역시 중구 공항로 272
+                  lat: 37.4449
+                  lng: 126.4656
+                summary: 출발지 추가 예시
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LocationModelRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LocationModelRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationModel'
+          description: ''
+  /api/plan/template/start/:
+    get:
+      operationId: api_plan_template_start_retrieve
+      description: 여행 계획을 생성하기 위한 시작 페이지를 렌더링합니다. Google Places API 키가 포함됩니다.
+      summary: 여행 계획 시작 페이지
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: HTML 템플릿이 성공적으로 렌더링됨
+          description: ''
+  /api/plan/travelplan/:
+    get:
+      operationId: api_plan_travelplan_list
+      description: 사용자의 모든 여행 계획을 조회합니다.
+      summary: 여행 계획 목록 조회
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTravelPlanDraftList'
+          description: ''
+    post:
+      operationId: api_plan_travelplan_create
+      description: 새로운 여행 계획을 Draft 상태로 생성합니다.
+      summary: 여행 계획 생성
+      tags:
+      - Planner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelPlanDraftRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TravelPlanDraftRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TravelPlanDraftRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelPlanDraft'
+          description: ''
+  /api/plan/travelplan/{id}/:
+    get:
+      operationId: api_plan_travelplan_retrieve
+      description: 특정 여행 계획의 상세 정보를 조회합니다.
+      summary: 여행 계획 상세 조회
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this travel plan.
+        required: true
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelPlanDraft'
+          description: ''
+    put:
+      operationId: api_plan_travelplan_update
+      description: Draft 상태의 여행 계획을 수정합니다.
+      summary: 여행 계획 수정
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this travel plan.
+        required: true
+      tags:
+      - Planner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelPlanUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TravelPlanUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TravelPlanUpdateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelPlanUpdate'
+          description: ''
+    patch:
+      operationId: api_plan_travelplan_partial_update
+      description: Draft 상태의 여행 계획을 부분적으로 수정합니다.
+      summary: 여행 계획 부분 수정
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this travel plan.
+        required: true
+      tags:
+      - Planner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTravelPlanUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTravelPlanUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTravelPlanUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelPlanUpdate'
+          description: ''
+    delete:
+      operationId: api_plan_travelplan_destroy
+      description: 여행 계획을 삭제합니다.
+      summary: 여행 계획 삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this travel plan.
+        required: true
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/plan/travelplan/{id}/confirm/:
+    post:
+      operationId: api_plan_travelplan_confirm_create
+      description: Draft 상태의 여행 계획을 최종 확정(confirmed) 상태로 변경합니다.
+      summary: 여행 계획 확정
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this travel plan.
+        required: true
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelPlanDraft'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: 확정할 수 없는 상태 (필수 정보 누락 등)
+          description: ''
+  /feed/api/{feed_id}/:
+    get:
+      operationId: feed_api_retrieve
+      description: 특정 피드의 상세 정보를 조회합니다. 현재 사용자의 좋아요, 북마크 상태도 함께 제공됩니다.
+      summary: 피드 상세 조회
+      parameters:
+      - in: path
+        name: feed_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Feed
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feed'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: 피드가 존재하지 않습니다.
+          description: ''
+  /feed/api/{feed_id}/bookmark/:
+    post:
+      operationId: feed_api_bookmark_create
+      description: 피드에 북마크를 추가하거나 취소합니다. 이미 북마크가 있으면 취소, 없으면 북마크를 추가합니다.
+      summary: 피드 북마크/북마크 취소
+      parameters:
+      - in: path
+        name: feed_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Feed
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_bookmarked:
+                    type: boolean
+                    description: 북마크 상태
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: 피드가 존재하지 않습니다.
+          description: ''
+  /feed/api/{feed_id}/like/:
+    post:
+      operationId: feed_api_like_create
+      description: 피드에 좋아요를 누르거나 취소합니다. 이미 좋아요가 있으면 취소, 없으면 좋아요를 추가합니다.
+      summary: 피드 좋아요/좋아요 취소
+      parameters:
+      - in: path
+        name: feed_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Feed
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_liked:
+                    type: boolean
+                    description: 좋아요 상태
+                  like_count:
+                    type: integer
+                    description: 총 좋아요 수
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: 피드가 존재하지 않습니다.
+          description: ''
+  /feed/api/create/:
+    post:
+      operationId: feed_api_create_create
+      description: 새로운 피드를 등록합니다. 인증된 사용자만 접근 가능합니다.
+      summary: 피드 등록
+      tags:
+      - Feed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedRequest'
+            examples:
+              피드등록예시:
+                value:
+                  caption: 제주도 여행 중 맛있는 음식 발견!
+                  place: 제주도 서귀포시
+                  latitude: 33.2515
+                  longitude: 126.5603
+                summary: 피드 등록 예시
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FeedRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FeedRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feed'
+          description: ''
+  /feed/api/feeds/:
+    get:
+      operationId: feed_api_feeds_list
+      description: 모든 피드 목록을 페이지네이션과 함께 조회합니다. 정렬 및 검색 기능을 지원합니다.
+      summary: 피드 목록 조회
+      parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: string
+        description: 정렬 기준 (created_at, like_count, -created_at, -like_count)
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: 페이지 번호
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: 검색어 (caption, place, username으로 검색)
+      tags:
+      - Feed
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFeedList'
+          description: ''
+  /feed/api/mybookmarks/:
+    get:
+      operationId: feed_api_mybookmarks_list
+      description: 현재 사용자가 북마크한 모든 피드 목록을 조회합니다.
+      summary: 내가 북마크한 피드 목록
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Feed
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFeedList'
+          description: ''
+  /feed/api/myfeeds/:
+    get:
+      operationId: feed_api_myfeeds_list
+      description: 현재 사용자가 작성한 모든 피드 목록을 조회합니다.
+      summary: 내가 작성한 피드 목록
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Feed
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFeedList'
+          description: ''
+  /plan/start/:
+    get:
+      operationId: plan_start_retrieve
+      description: 여행 계획을 생성하기 위한 시작 페이지를 렌더링합니다. Google Places API 키가 포함됩니다.
+      summary: 여행 계획 시작 페이지
+      tags:
+      - Planner
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: HTML 템플릿이 성공적으로 렌더링됨
+          description: ''
+components:
+  schemas:
+    Feed:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        place:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        caption:
+          type: string
+        lat:
+          type: number
+          format: double
+          nullable: true
+        lon:
+          type: number
+          format: double
+          nullable: true
+        user:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        like_count:
+          type: integer
+          readOnly: true
+        is_liked:
+          type: boolean
+          readOnly: true
+        is_bookmarked:
+          type: boolean
+          readOnly: true
+        is_mine:
+          type: boolean
+          readOnly: true
+      required:
+      - caption
+      - created_at
+      - id
+      - images
+      - is_bookmarked
+      - is_liked
+      - is_mine
+      - like_count
+      - place
+      - user
+    FeedRequest:
+      type: object
+      properties:
+        place:
+          type: string
+          minLength: 1
+        caption:
+          type: string
+          minLength: 1
+        lat:
+          type: number
+          format: double
+          nullable: true
+        lon:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - caption
+      - place
+    LocationModel:
+      type: object
+      description: |-
+        - plan: write_only, 뷰에서 save(plan=...) 형태로 주입
+        - type: 뷰에서 자동 주입하므로 required=False
+        - place_id, name, address, lat, lng: 클라이언트에서 전달
+        - create(): upsert_location 호출
+        - update(): type/plan 변경 금지, 나머지 필드만 덮어씀
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        place_id:
+          type: string
+          nullable: true
+          description: Googleplaces API에서 제공하는 고유 장소 ID
+          maxLength: 255
+        name:
+          type: string
+          description: '예: “서울역”, “제주공항” 등. 외부 API에서 받은 장소명이 있으면 저장'
+          maxLength: 255
+        address:
+          type: string
+          description: '외부 API(예: Geoapify)에서 받은 전체 주소 문자열'
+          maxLength: 255
+        lat:
+          type: number
+          format: double
+          description: 위도(latitude)
+        lng:
+          type: number
+          format: double
+          description: 경도(longitude)
+      required:
+      - id
+      - lat
+      - lng
+    LocationModelRequest:
+      type: object
+      description: |-
+        - plan: write_only, 뷰에서 save(plan=...) 형태로 주입
+        - type: 뷰에서 자동 주입하므로 required=False
+        - place_id, name, address, lat, lng: 클라이언트에서 전달
+        - create(): upsert_location 호출
+        - update(): type/plan 변경 금지, 나머지 필드만 덮어씀
+      properties:
+        plan:
+          type: string
+          format: uuid
+          writeOnly: true
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        place_id:
+          type: string
+          nullable: true
+          description: Googleplaces API에서 제공하는 고유 장소 ID
+          maxLength: 255
+        name:
+          type: string
+          description: '예: “서울역”, “제주공항” 등. 외부 API에서 받은 장소명이 있으면 저장'
+          maxLength: 255
+        address:
+          type: string
+          description: '외부 API(예: Geoapify)에서 받은 전체 주소 문자열'
+          maxLength: 255
+        lat:
+          type: number
+          format: double
+          description: 위도(latitude)
+        lng:
+          type: number
+          format: double
+          description: 경도(longitude)
+      required:
+      - lat
+      - lng
+    PaginatedFeedList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Feed'
+    PaginatedLocationModelList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationModel'
+    PaginatedTravelPlanDraftList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TravelPlanDraft'
+    PatchedTravelPlanUpdateRequest:
+      type: object
+      description: |-
+        - Draft 상태 여행 계획을 수정할 때 사용합니다.
+        - 기존 instance의 start_date/end_date는 이미 유효하게 저장된 값이므로,
+          attrs에서 값이 없으면 instance의 값을 그대로 사용합니다.
+        - 새로운 값이 들어올 때만 '오늘 이전인지', '시작 ≤ 종료인지', '예산 ≥ 0인지'를 재검증합니다.
+        - status='confirmed' 상태인 경우 수정할 수 없도록 막습니다.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        budget_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+    TravelPlanDraft:
+      type: object
+      description: |-
+        1) 클라이언트가 여행 일정·예산을 입력하면,
+        2) status='draft'로 TravelPlan 인스턴스를 생성하기 위해 사용하는 Serializer입니다.
+
+        - id, created_at, updated_at 필드는 읽기 전용(read_only).
+        - user는 요청한 유저(request.user)를 자동으로 할당.
+        - status는 항상 'draft'로 세팅(사용자가 별도로 입력하지 않음).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        budget_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        status:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - end_date
+      - id
+      - start_date
+      - status
+      - updated_at
+    TravelPlanDraftRequest:
+      type: object
+      description: |-
+        1) 클라이언트가 여행 일정·예산을 입력하면,
+        2) status='draft'로 TravelPlan 인스턴스를 생성하기 위해 사용하는 Serializer입니다.
+
+        - id, created_at, updated_at 필드는 읽기 전용(read_only).
+        - user는 요청한 유저(request.user)를 자동으로 할당.
+        - status는 항상 'draft'로 세팅(사용자가 별도로 입력하지 않음).
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        budget_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+      required:
+      - end_date
+      - start_date
+    TravelPlanUpdate:
+      type: object
+      description: |-
+        - Draft 상태 여행 계획을 수정할 때 사용합니다.
+        - 기존 instance의 start_date/end_date는 이미 유효하게 저장된 값이므로,
+          attrs에서 값이 없으면 instance의 값을 그대로 사용합니다.
+        - 새로운 값이 들어올 때만 '오늘 이전인지', '시작 ≤ 종료인지', '예산 ≥ 0인지'를 재검증합니다.
+        - status='confirmed' 상태인 경우 수정할 수 없도록 막습니다.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        budget_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        status:
+          type: string
+          readOnly: true
+      required:
+      - end_date
+      - id
+      - start_date
+      - status
+      - title
+    TravelPlanUpdateRequest:
+      type: object
+      description: |-
+        - Draft 상태 여행 계획을 수정할 때 사용합니다.
+        - 기존 instance의 start_date/end_date는 이미 유효하게 저장된 값이므로,
+          attrs에서 값이 없으면 instance의 값을 그대로 사용합니다.
+        - 새로운 값이 들어올 때만 '오늘 이전인지', '시작 ≤ 종료인지', '예산 ≥ 0인지'를 재검증합니다.
+        - status='confirmed' 상태인 경우 수정할 수 없도록 막습니다.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        budget_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+      required:
+      - end_date
+      - start_date
+      - title
+    TypeEnum:
+      enum:
+      - origin
+      - destination
+      type: string
+      description: |-
+        * `origin` - 출발지
+        * `destination` - 목적지
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+tags:
+- name: Feed
+  description: 피드 관련 API
+- name: Planner
+  description: 여행 계획 관련 API
+- name: Flight
+  description: 항공편 검색 관련 API

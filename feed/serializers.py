@@ -3,6 +3,7 @@
 
 from rest_framework import serializers
 from feed.models import Feed, FeedImage
+from drf_spectacular.utils import extend_schema_field
 
 
 class FeedSerializer(serializers.ModelSerializer):
@@ -73,9 +74,11 @@ class FeedSerializer(serializers.ModelSerializer):
 
         return feed
 
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
     def get_images(self, obj):
         return [img.image.url for img in obj.images.all()]
 
+    @extend_schema_field(serializers.DictField())
     def get_user(self, obj):
         return {
             "id": obj.user.id,
@@ -83,20 +86,24 @@ class FeedSerializer(serializers.ModelSerializer):
             # 다른 필드들 필요시 추가
         }
 
+    @extend_schema_field(serializers.IntegerField())
     def get_like_count(self, obj):
         return obj.likes.count()
 
+    @extend_schema_field(serializers.BooleanField())
     def get_is_liked(self, obj):
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return obj.likes.filter(user=request.user).exists()
         return False
 
+    @extend_schema_field(serializers.BooleanField())
     def get_is_bookmarked(self, obj):
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return obj.bookmarks.filter(user=request.user).exists()
         return False
 
+    @extend_schema_field(serializers.BooleanField())
     def get_is_mine(self, obj):
         return obj.user == self.context["request"].user

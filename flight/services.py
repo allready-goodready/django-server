@@ -117,7 +117,9 @@ def get_airlines_info(codes):
         return {}
 
 
-def book_flight(offer_snapshot, travelers, remarks=None, ticketing_agreement=None, contacts=None):
+def book_flight(
+    offer_snapshot, travelers, remarks=None, ticketing_agreement=None, contacts=None
+):
     """
     offer_snapshot: selected_offer_snapshot (dict)
     travelers: list of traveler dicts matching API 스펙
@@ -131,7 +133,7 @@ def book_flight(offer_snapshot, travelers, remarks=None, ticketing_agreement=Non
     data = {
         "type": "flight-order",
         "flightOffers": [flight_offer],
-        "travelers": travelers
+        "travelers": travelers,
     }
     if remarks:
         data["remarks"] = remarks
@@ -143,10 +145,7 @@ def book_flight(offer_snapshot, travelers, remarks=None, ticketing_agreement=Non
     body = {"data": data}
 
     try:
-        response = amadeus.client.post(
-            "/v1/booking/flight-orders",
-            body
-        )
+        response = amadeus.client.post("/v1/booking/flight-orders", body)
         return response.data
     except ResponseError as error:
         print("Amadeus booking error:", error, getattr(error, "response", None))
