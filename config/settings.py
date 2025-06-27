@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "django_bootstrap5",
     "rest_framework",
+    "drf_spectacular",
     "feed",  # FD-01
     "planner",
     "flight",
@@ -166,5 +167,25 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# drf-spectacular 설정
+SPECTACULAR_SETTINGS = {
+    "TITLE": "AllReady API",
+    "DESCRIPTION": "AllReady 여행 플래너 API 문서",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+    },
+    "TAGS": [
+        {"name": "Feed", "description": "피드 관련 API"},
+        {"name": "Planner", "description": "여행 계획 관련 API"},
+        {"name": "Flight", "description": "항공편 검색 관련 API"},
     ],
 }
