@@ -4,6 +4,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from planner.models import TravelPlan
+
+# drf-spectacular 문서화 데코레이터
+from drf_spectacular.utils import extend_schema
+from drf_spectacular.openapi import OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from .services import (
     get_nearest_airport,
     search_flight_offers,
@@ -14,6 +19,38 @@ from .services import (
 from .models import FlightSelection
 
 
+@extend_schema(
+    tags=["Flight"],
+    summary="항공편 검색",
+    description="여행 계획을 기반으로 항공편을 검색합니다.",
+    parameters=[
+        OpenApiParameter(
+            name="plan_id",
+            type=OpenApiTypes.UUID,
+            location=OpenApiParameter.QUERY,
+            description="여행 계획 ID",
+            required=True,
+        ),
+        OpenApiParameter(
+            name="adults",
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.QUERY,
+            description="성인 승객 수 (기본값: 1)",
+        ),
+        OpenApiParameter(
+            name="earliest_dep",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description="최소 출발 시간 (HH:MM 형식)",
+        ),
+        OpenApiParameter(
+            name="latest_arr",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description="최대 도착 시간 (HH:MM 형식)",
+        ),
+    ],
+)
 class FlightSearchAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -101,6 +138,20 @@ class FlightSearchAPIView(APIView):
         return Response({"offers": offers, "default_offer": default_offer})
 
 
+@extend_schema(
+    tags=["Flight"],
+    summary="항공편 후보 조회",
+    description="이전에 검색한 항공편 후보들을 조회합니다.",
+    parameters=[
+        OpenApiParameter(
+            name="plan_id",
+            type=OpenApiTypes.UUID,
+            location=OpenApiParameter.QUERY,
+            description="여행 계획 ID",
+            required=True,
+        ),
+    ],
+)
 class FlightCandidatesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -116,6 +167,29 @@ class FlightCandidatesAPIView(APIView):
         )
 
 
+@extend_schema(
+    tags=["Flight"],
+    summary="항공편 선택",
+    description="검색된 항공편 중 하나를 선택합니다.",
+    request={
+        "application/json": {
+            "type": "object",
+            "properties": {
+                "plan_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "여행 계획 ID",
+                },
+                "offer_id": {"type": "string", "description": "선택할 항공편 제안 ID"},
+                "offer_snapshot": {
+                    "type": "object",
+                    "description": "선택한 항공편의 상세 정보",
+                },
+            },
+            "required": ["plan_id", "offer_id", "offer_snapshot"],
+        }
+    },
+)
 class FlightSelectAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -135,11 +209,35 @@ class FlightSelectAPIView(APIView):
         return Response({"success": True}, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Flight"],
+    summary="항공편 예약",
+    description="선택한 항공편을 실제로 예약합니다.",
+    request={
+        "application/json": {
+            "type": "object",
+            "properties": {
+                "plan_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "여행 계획 ID",
+                },
+            },
+            "required": ["plan_id"],
+        }
+    },
+    responses={
+        200: {"description": "예약 성공"},
+        400: {"description": "예약 실패 (사용자 정보 부족 등)"},
+    },
+)
 class FlightBookAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        plan = get_object_or_404(TravelPlan, id=request.data.get("plan_id"), user=request.user)
+        plan = get_object_or_404(
+            TravelPlan, id=request.data.get("plan_id"), user=request.user
+        )
         flight_sel = get_object_or_404(FlightSelection, plan=plan)
 
         offer_snapshot = flight_sel.selected_offer_snapshot
@@ -151,7 +249,7 @@ class FlightBookAPIView(APIView):
                 "dateOfBirth": request.user.profile.date_of_birth,
                 "name": {
                     "firstName": request.user.first_name.upper(),
-                    "lastName": request.user.last_name.upper()
+                    "lastName": request.user.last_name.upper(),
                 },
                 "gender": request.user.profile.gender.upper(),
                 "contact": {
@@ -160,9 +258,9 @@ class FlightBookAPIView(APIView):
                         {
                             "deviceType": "MOBILE",
                             "countryCallingCode": "82",
-                            "number": request.user.profile.phone_number
+                            "number": request.user.profile.phone_number,
                         }
-                    ]
+                    ],
                 },
                 "documents": [
                     {
@@ -175,15 +273,18 @@ class FlightBookAPIView(APIView):
                         "issuanceCountry": request.user.profile.nationality,
                         "validityCountry": request.user.profile.nationality,
                         "nationality": request.user.profile.nationality,
-                        "holder": True
+                        "holder": True,
                     }
-                ]
+                ],
             }
         ]
 
         remarks = {
             "general": [
-                {"subType": "GENERAL_MISCELLANEOUS", "text": "ONLINE BOOKING FROM ALLREADY"}
+                {
+                    "subType": "GENERAL_MISCELLANEOUS",
+                    "text": "ONLINE BOOKING FROM ALLREADY",
+                }
             ]
         }
         ticketing_agreement = {"option": "DELAY_TO_CANCEL", "delay": "6D"}
@@ -193,15 +294,19 @@ class FlightBookAPIView(APIView):
                 "companyName": "ALLREADY Inc.",
                 "purpose": "STANDARD",
                 "phones": [
-                    {"deviceType": "LANDLINE", "countryCallingCode": "82", "number": "02-1234-5678"}
+                    {
+                        "deviceType": "LANDLINE",
+                        "countryCallingCode": "82",
+                        "number": "02-1234-5678",
+                    }
                 ],
                 "emailAddress": "support@allready.com",
                 "address": {
                     "lines": ["123 Seoul St."],
                     "postalCode": "04524",
                     "cityName": "Seoul",
-                    "countryCode": "KR"
-                }
+                    "countryCode": "KR",
+                },
             }
         ]
 
@@ -210,7 +315,7 @@ class FlightBookAPIView(APIView):
             travelers,
             remarks=remarks,
             ticketing_agreement=ticketing_agreement,
-            contacts=contacts
+            contacts=contacts,
         )
 
         flight_sel.booking_data = booking_data
@@ -219,7 +324,20 @@ class FlightBookAPIView(APIView):
         return Response({"booking_data": booking_data}, status=status.HTTP_200_OK)
 
 
-
+@extend_schema(
+    tags=["Flight"],
+    summary="출발지 근처 공항 조회",
+    description="여행 계획의 출발지 근처에 있는 공항 정보를 조회합니다.",
+    parameters=[
+        OpenApiParameter(
+            name="plan_id",
+            type=OpenApiTypes.UUID,
+            location=OpenApiParameter.QUERY,
+            description="여행 계획 ID",
+            required=True,
+        ),
+    ],
+)
 class AirportNearOriginAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -236,6 +354,20 @@ class AirportNearOriginAPIView(APIView):
         return Response(result)
 
 
+@extend_schema(
+    tags=["Flight"],
+    summary="목적지 근처 공항 조회",
+    description="여행 계획의 목적지 근처에 있는 공항 정보를 조회합니다.",
+    parameters=[
+        OpenApiParameter(
+            name="plan_id",
+            type=OpenApiTypes.UUID,
+            location=OpenApiParameter.QUERY,
+            description="여행 계획 ID",
+            required=True,
+        ),
+    ],
+)
 class AirportNearDestAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
