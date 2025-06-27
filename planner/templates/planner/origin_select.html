@@ -20,6 +20,7 @@
     height: 60px;
     padding: 0 15px;
     justify-content: center;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.25);
   }
   .origin-geolocation-picker,
   .origin-search-picker-area {
@@ -90,54 +91,54 @@
 </style>
 <div class="origin-set-message"></div>
 <!-- 1) 상단 선택 영역 -->
-<div class="origin-selector d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded">
-    <!-- 왼쪽: 현재 위치 사용 -->
-    <div id="origin-geolocation-picker"
-         class="origin-geolocation-picker d-flex gap-2">
-        <img src="/static/images/point.svg"
-             alt="현재 위치"
-             class="picker-icon"
-             width="24"
-             height="24" />
-        <span class="picker-text">현재 위치 사용</span>
-    </div>
-    <div class="origin-separator"></div>
-    <!-- 오른쪽: 주소 검색 -->
-    <div id="origin-search-picker-area"
-         class="origin-search-picker-area d-flex gap-2">
-        <img src="/static/images/lens.svg"
-             alt="검색"
-             class="picker-icon"
-             width="24"
-             height="24" />
-        <span class="picker-text">주소 검색</span>
-    </div>
+<div class="origin-selector d-inline-flex align-items-center justify-content-center bg-white rounded">
+  <!-- 왼쪽: 현재 위치 사용 -->
+  <div id="origin-geolocation-picker"
+       class="origin-geolocation-picker d-flex gap-2">
+    <img src="/static/images/point.svg"
+         alt="현재 위치"
+         class="picker-icon"
+         width="24"
+         height="24" />
+    <span class="picker-text">현재 위치 사용</span>
+  </div>
+  <div class="origin-separator"></div>
+  <!-- 오른쪽: 주소 검색 -->
+  <div id="origin-search-picker-area"
+       class="origin-search-picker-area d-flex gap-2">
+    <img src="/static/images/lens.svg"
+         alt="검색"
+         class="picker-icon"
+         width="24"
+         height="24" />
+    <span class="picker-text">주소 검색</span>
+  </div>
 </div>
 <!-- 2) 주소 자동완성 섹션 (초기엔 hidden) -->
 <div id="origin-search-section" class="origin-search-section mt-3 d-none">
-    <div class="input-group mb-2 position-relative">
-        <div id="origin-search-autocomplete-container" class="form-control"></div>
-        <button id="origin-search-confirm-btn"
-                class="btn btn-primary"
-                type="button"
-                disabled>출발지 선택</button>
-    </div>
-    <div id="origin-autocomplete-error-message"
-         class="text-danger small d-none">유효한 장소를 선택해주세요.</div>
+  <div class="input-group mb-2 position-relative">
+    <div id="origin-search-autocomplete-container" class="form-control"></div>
+    <button id="origin-search-confirm-btn"
+            class="btn btn-primary"
+            type="button"
+            disabled>출발지 선택</button>
+  </div>
+  <div id="origin-autocomplete-error-message"
+       class="text-danger small d-none">유효한 장소를 선택해주세요.</div>
 </div>
 <!-- 3) 선택 정보 + 확인 버튼 섹션 -->
 <div id="origin-confirm-section"
      class="origin-confirm-section mt-3 d-none d-flex align-items-center justify-content-between">
-    <div class="origin-location-info me-2">선택된 출발지 정보가 여기에 표시됩니다.</div>
-    <button id="origin-confirm-btn"
-            type="button"
-            class="btn btn-primary"
-            disabled>출발지 선택</button>
-    <div id="origin-geolocation-error-alert"
-         class="alert alert-danger ms-2 small d-none">위치 정보를 가져올 수 없습니다.</div>
+  <div class="origin-location-info me-2">선택된 출발지 정보가 여기에 표시됩니다.</div>
+  <button id="origin-confirm-btn"
+          type="button"
+          class="btn btn-primary"
+          disabled>출발지 선택</button>
+  <div id="origin-geolocation-error-alert"
+       class="alert alert-danger ms-2 small d-none">위치 정보를 가져올 수 없습니다.</div>
 </div>
 {% block script %}
-    <script>
+  <script>
 (function() {
   // --- 상태 저장 객체 ---
   let selectedOriginData = {
@@ -315,5 +316,5 @@
   }
 
 })();
-    </script>
+  </script>
 {% endblock %}
