@@ -1,0 +1,35 @@
+<!-- templates/feed/feed_crop.html -->
+<!-- 사진 크롭 용 두번째 모달 --> 
+<div id="modal_crop_feed" class="modal modal_overlay">
+  <!-- 바깥 X 버튼 -->
+  <span class="modal_close_outer" id="close_crop_modal_x">×</span>
+
+  <div class="crop_modal_window">
+    <!-- 상단 타이틀 바 -->
+    <div class="feed_create_nav d-flex justify-content-between align-items-center px-3">
+      <span class="material-icons-outlined" id="close_crop_modal" >arrow_back</span>
+      <span class="modal_title_text">자르기</span>
+      <a id="apply_crop" class="feed_create_next text-decoration-none">다음</a>
+    </div>
+
+    <!-- 크롭 영역 전체 감싸는 부분 -->
+    <div class="crop_modal_content d-flex align-items-center justify-content-center">
+      <!-- 비율 선택 버튼들 -->
+      <div class="ratio_buttons d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" data-ratio="1">1:1</button>
+        <button class="btn btn-sm btn-outline-secondary active" data-ratio="0.8">4:5</button>
+        <button class="btn btn-sm btn-outline-secondary" data-ratio="1.7777">16:9</button>
+      </div>
+    
+      <!-- 이미지 및 화살표 감싸는 박스 -->
+      <div id="cropper_container" class="image-box" >
+        <!-- 좌우 화살표 
+        <button id="crop_prev" class="arrow left">&#10094;</button>
+        <button id="crop_next" class="arrow right">&#10095;</button>-->
+
+        <!-- 실제 자를 이미지 -->
+        <img id="crop_target_image" src="" alt="자르기 대상" />
+      </div>
+    </div>    
+  </div>
+</div>
