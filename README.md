@@ -1,115 +1,199 @@
-## 커밋 메시지 규칙
+# AllReady - 여행 계획 및 피드 공유 플랫폼
 
-- 커밋 메시지에 커밋 타입과 내용을 기입해야 합니다.
+## 📋 프로젝트 소개
 
-| 타입     | 설명                                    | 예시                                          |
-| -------- | --------------------------------------- | --------------------------------------------- |
-| feat     | 새로운 기능 추가                        | `feat: 로그인 API 토큰 발급 로직 추가`        |
-| fix      | 버그 수정                               | `fix: 모델 확률 출력 오류 수정`               |
-| docs     | 문서 변경                               | `docs: 설치 및 실행 방법 보강`                |
-| style    | 코드 포맷·세미콜론·공백 등 스타일 변경  | `style: 버튼 여백 조정`                       |
-| refactor | 코드 리팩터링(기능 변경 없이 구조 개선) | `refactor: UserProfile 관계 정리`             |
-| perf     | 성능 개선                               | `perf: 캐시 적용으로 응답 속도 향상`          |
-| test     | 테스트 코드 추가·수정                   | `test: eye 모델 유닛 테스트 추가`             |
-| chore    | 기타 변경(빌드, 설정 파일 등)           | `chore: GitHub Action 워크플로우 추가`        |
-| ci       | CI/CD 설정 변경                         | `ci: 도커 이미지 빌드 스크립트 수정`          |
-| build    | 빌드 시스템 변경(의존성 업데이트 등)    | `build: drf-simplejwt 최신 버전으로 업데이트` |
-| revert   | 이전 커밋 되돌리기                      | `revert: feat: 피드 카드 레이아웃 변경`       |
+**AllReady**는 여행자들이 여행 계획을 세우고, 여행 경험을 공유할 수 있는 통합 플랫폼입니다.
+여행 계획부터 항공편 검색, 여행 후기 공유까지 한 곳에서 모든 여행 관련 서비스를 제공합니다.
 
+## ✨ 주요 기능
 
----
+### 🗓️ 여행 계획 (Travel Planner)
 
-## 1. 브랜치 종류 및 네이밍 규칙
+-   여행 계획 생성 및 관리
+-   출발지 및 목적지 설정
+-   여행 날짜 및 예산 설정
+-   계획 상태 관리 (임시저장/확정)
 
-| 브랜치 종류 | 역할                                                                     | 네이밍 예시         |
-| ----------- | ------------------------------------------------------------------------ | ------------------- |
-| **main**    | 배포 가능한 최종 결과물 (Production)                                     | `main`              |
-| **develop** | 다음 버전 개발을 위한 통합 브랜치                                        | `develop`           |
-| **feat**    | WBS 또는 기능 명세서 기반으로 한 작업 단위 개발                          | `feat-FD-01`        |
-| **bugfix**  | 배포된 기능(또는 develop)에서 발견된 버그 수정                           | `bugfix-FEED-03`    |
-| **release** | 다음 배포를 준비 (테스트, 문서·릴리즈 노트 작성 등)                      | `release-v1.2.0`    |
-| **hotfix**  | Production(`main`)에서 긴급히 수정할 필요가 있는 경우                    | `hotfix-PROD-123`   |
-| **chore**   | 라이브러리 업데이트, 설정 변경, 문서·CI 수정 등 코드 기능 변화 없는 작업 | `chore-deps-update` |
+### 📸 여행 피드 (Travel Feed)
 
----
+-   여행 사진 및 후기 공유
+-   이미지 다중 업로드 지원
+-   좋아요 및 북마크 기능
+-   위치 기반 피드 작성
+-   피드 검색 및 필터링
 
-## 2. 브랜치 생성/병합 흐름
+### ✈️ 항공편 검색 (Flight Search)
 
-1. **개발 시작**
+-   실시간 항공편 검색
+-   항공편 비교 및 선택
+-   예약 데이터 관리
+-   공항 위치 기반 검색
 
-   - 모든 기능 개발은 `feat` 브랜치에서 분기
-   - 예: `git checkout -b feat-FD-01`
+### 🔍 검색 및 지도 기능
 
-2. **기능 완료 후 PR**
+-   장소 검색 (Google API 연동)
+-   지도 기반 위치 선택
+-   좌표 기반 위치 저장
 
-   - `feat-*`, `bugfix-*` 브랜치는 PR(PR 대상: `feat`)
-   - 코드 리뷰 → `feat` 병합
+## 🛠️ 사용 기술
 
+### Backend
 
----
+-   **Django 4.2.21** - 웹 프레임워크
+-   **Django REST Framework** - API 개발
+-   **MySQL** - 데이터베이스
+-   **drf-spectacular** - API 문서화
 
-## 3. 브랜치 네이밍 가이드라인
+### Frontend
 
-- **소문자 + 하이픈(-) 구분**
-  예) `feat-user-auth`, `bugfix-feed-crash`
-- **작업 코드 포함**
-  예) `feat-FD-01`
+-   **Bootstrap 5** - UI 프레임워크 (django-bootstrap5 사용)
+-   **Vanilla JavaScript** - 동적 기능 구현 (피드 목록, 페이지네이션, 모달 등)
+-   **jQuery 3.4.1** - 외부 라이브러리 지원
+-   **Cropper.js 1.5.13** - 이미지 크롭 기능
+-   **Google Material Icons** - 아이콘 라이브러리 (북마크, 검색 등)
+-   **CSS3** - 커스텀 스타일링, Flexbox, Transitions
 
----
+### 외부 API
 
-## 4. 추가 팁
+-   **Google Maps API** - 지도 및 장소 검색 (Places API 포함)
+-   **Amadeus API** - 항공편 검색
+-   **Cloudinary** - 이미지 저장 및 관리
 
-- **Protect 설정**: `main`, `develop` 브랜치에 직접 Push 금지
-- **Branch Policy**: PR 승인 최소 1명 이상
+### 개발 도구
 
----
+-   **Black** - 코드 포맷팅
+-   **Flake8** - 코드 린팅
+-   **django-environ** - 환경변수 관리
+-   **Crispy Forms** - Django 폼 렌더링
 
-## template 코드 위치
+## 📁 프로젝트 구조
 
-+ **전역템플릿 (BASE_DIR/templates/)**
-: base.html, 공통 include 파일(navbar, footer 등)을 두고, 모든 앱 템플릿에서 {% extends "base.html" %} 사용
-
-<br>
-
-+ **앱별 템플릿 (앱이름/templates/앱이름/)**
-: APP_DIRS=True 일 때 render(request, "accounts/signup.html", {...}) 처럼 경로를 지정
-
-
-
-## .env 예시:
-
-```shell
-MYSQL_DATABASE=allready_db
-MYSQL_USER=allready_user
-MYSQL_PASSWORD=secret_password
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
+```
+allready/
+├── config/                    # 프로젝트 설정
+│   ├── settings.py           # Django 설정
+│   ├── urls.py              # 메인 URL 설정
+│   └── management/          # 관리 명령어
+├── accounts/                 # 사용자 계정 관리
+├── feed/                    # 피드 관련 기능
+│   ├── models.py           # 피드, 이미지, 좋아요, 북마크 모델
+│   ├── views.py            # 피드 뷰 로직
+│   ├── serializers.py      # API 시리얼라이저
+│   └── templates/          # 피드 템플릿
+├── planner/                 # 여행 계획 기능
+│   ├── models.py           # 여행계획, 위치 모델
+│   ├── services.py         # 비즈니스 로직
+│   └── templates/          # 계획 템플릿
+├── flight/                  # 항공편 검색 기능
+│   ├── models.py           # 항공편 선택 모델
+│   ├── services.py         # 외부 API 연동
+│   └── templates/          # 항공편 템플릿
+├── static/                  # 정적 파일
+│   ├── css/                # 스타일시트
+│   ├── js/                 # JavaScript 파일
+│   └── images/             # 이미지 파일
+└── templates/               # 공통 템플릿
+    ├── base.html           # 기본 템플릿
+    └── common/             # 공통 컴포넌트
 ```
 
-## Python / Django / DB 버전
+## 🖥️ 구현 화면
 
-| 항목   | 버전     | 비고                    |
-| ------ | -------- | ----------------------- |
-| Python | `3.11.9` | pyenv 가상환경          |
-| Django | `4.2.x`  | LTS 지원                |
-| MySQL  | `8.4.x`  | macOS/Windows 공통 추천 |
+### 피드 관련 화면
 
-## pip 패키지
+-   **피드 목록** (`feed_list.html`) - 모든 피드 조회
+-   **피드 상세** (`feed_detail.html`) - 피드 상세 정보 및 상호작용
+-   **피드 작성** (`feed_create.html`) - 새 피드 작성
+-   **피드 업로드** (`feed_upload.html`) - 이미지 업로드
+-   **피드 크롭** (`feed_crop.html`) - 이미지 편집
+-   **지도 모달** (`feed_map_modal.html`) - 위치 선택
+-   **검색 모달** (`feed_search_modal.html`) - 피드 검색
 
-| 패키지                      | 버전 (권장) | 용도                                 |
-| --------------------------- | ----------- | ------------------------------------ |
-| `Django`                    | `~=4.2`     | 웹 프레임워크                        |
-| `djangorestframework`       | 최신        | REST API 제공                        |
-| `django-allauth`            | 최신        | 소셜 로그인·회원관리                 |
-| `drf-spectacular`           | 최신        | OpenAPI/Swagger 문서화               |
-| `pillow`                    | 최신        | 이미지 처리                          |
-| `cloudinary`                | 최신        | 미디어 호스팅                        |
-| `django-cloudinary-storage` | 최신        | Cloudinary 스토리지 백엔드           |
-| `dj-rest-auth[with_social]` | 최신        | 로그인/로그아웃/회원가입/소셜 로그인 |
-| `django-filter`             | 최신        | DRF 쿼리 파라미터 필터링             |
-| `django-environ`            | 최신        | `.env` 기반 환경변수 관리            |
-| `whitenoise`                | 최신        | 정적 파일 서빙 (배포용)              |
-| `mysqlclient`               | 최신        | MySQL 연동 드라이버                  |
-| `crispy_forms`              | 최신        | Django 폼 렌더링/레이아웃            |
-| `crispy_bootstrap5`         | 최신        | Bootstrap5용 crispy-forms 템플릿팩   |
-| `bootstrap5`                | 최신        | Bootstrap5 컴포넌트 지원             |
+### 여행 계획 화면
+
+-   **계획 시작** (`plan_start.html`) - 여행 계획 시작 페이지
+-   **출발지 선택** (`origin_select.html`) - 출발지 설정
+-   **목적지 선택** (`destination_select.html`) - 목적지 설정
+
+### 항공편 검색 화면
+
+-   **항공편 검색** (`flight_search.html`) - 항공편 검색 및 선택
+
+### 공통 UI 컴포넌트
+
+-   **네비게이션 바** (`navbar.html`) - 사이트 전체 내비게이션
+-   **기본 레이아웃** (`base.html`) - 전체 페이지 레이아웃
+
+## 🚀 프로젝트 실행 방법
+
+### 1. 환경 설정
+
+```bash
+# 가상환경 생성 및 활성화
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 의존성 설치
+pip install -r requirements.txt
+```
+
+### 2. 환경변수 설정
+
+`.env` 파일을 생성하고 다음 내용을 추가:
+
+```bash
+# 데이터베이스 설정
+DATABASE_URL=mysql://사용자명:비밀번호@localhost:3306/데이터베이스명
+
+# 외부 API 키
+GOOGLE_API_KEY=your_google_api_key
+AMADEUS_CLIENT_ID=your_amadeus_client_id
+AMADEUS_CLIENT_SECRET=your_amadeus_client_secret
+
+# Cloudinary 설정 (선택사항)
+CLOUDINARY_URL=cloudinary://your_cloudinary_config
+```
+
+### 3. 데이터베이스 설정
+
+```bash
+# 마이그레이션 파일 생성
+python manage.py makemigrations
+
+# 마이그레이션 실행
+python manage.py migrate
+
+# 관리자 계정 생성
+python manage.py createsuperuser
+```
+
+### 4. 개발 서버 실행
+
+```bash
+# 개발 서버 시작
+python manage.py runserver
+
+# 브라우저에서 접속
+# http://localhost:8000
+```
+
+### 5. API 문서 확인
+
+서버 실행 후 다음 URL에서 API 문서를 확인할 수 있습니다:
+
+-   **Swagger UI**: `http://localhost:8000/api/docs/`
+-   **ReDoc**: `http://localhost:8000/api/redoc/`
+-   **API 스키마**: `http://localhost:8000/api/schema/`
+
+## 📚 추가 정보
+
+### 권장 개발 환경
+
+-   **Python**: 3.11.9
+-   **Django**: 4.2.x (LTS)
+-   **MySQL**: 8.4.x
+-   **Node.js**: 최신 LTS (프론트엔드 도구용)
+
+---
+
+**AllReady** - 모든 여행 준비를 한 곳에서 ✈️🌍
